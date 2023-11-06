@@ -1,11 +1,13 @@
 <script setup>
+import Everplanner from './components/Everplanner.vue';
 </script>
 
 <template>
-  <header>
-    Some text
-  </header>
+  <Everplanner />
 </template>
 
-<style scoped>
+<style>
+body.body {
+  background-color: tan;
+}
 </style>
