@@ -1,11 +1,10 @@
-<script setup>
-</script>
-
 <template>
-  <main>
-    Введіть список задач проєкту:
-  </main>
+  <main>Діаграма Ганта для проєкту:</main>
+  <GanttChart />
 </template>
 
-<style scoped>
-</style>
+<script setup>
+import GanttChart from "./GanttChart.vue";
+</script>
+
+<style scoped></style>
