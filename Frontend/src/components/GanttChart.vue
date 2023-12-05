@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div class="container-fluid text-center">
+    <h4>Діаграма Ганта для проєкту:</h4>
     <Bar id="my-chart-id" :options="chartOptions" :data="chartData" :style="style" />
   </div>
 </template>

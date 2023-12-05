@@ -1,13 +1,11 @@
 <template>
-  <Everplanner />
+  <Planner />
+  <!-- <GanttChart /> -->
 </template>
 
 <script setup>
-import Everplanner from './components/Everplanner.vue';
+import Planner from "./components/Planner.vue";
+import GanttChart from "./components/GanttChart.vue";
 </script>
 
-<style>
-body.body {
-  background-color: bisque;
-}
-</style>
+<style></style>
