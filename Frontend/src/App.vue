@@ -8,4 +8,4 @@ import Planner from "./components/Planner.vue";
 import GanttChart from "./components/GanttChart.vue";
 </script>
 
-<style></style>
+<style scoped></style>

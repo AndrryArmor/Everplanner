@@ -2,8 +2,8 @@
   <form>
     <div class="container-fluid mt-3 workers">
       <h4 class="ms-5">Співробітники</h4>
-      <div class="row">
-        <div class="col-auto px-0 mx-2 overflow-x-auto table-col">
+      <div class="row overflow-x-auto">
+        <div class="col-auto table-col">
           <table class="table m-0">
             <thead>
               <th></th>
@@ -22,7 +22,7 @@
                 <td>1</td>
                 <td>Ачілов А. В.</td>
                 <td>1000</td>
-                <td>15 SP/week</td>
+                <td>15 {{ developmentVelocityMetric }}</td>
               </tr>
               <tr>
                 <td>
@@ -39,13 +39,13 @@
                 <td>
                   <div class="input-group">
                     <input type="number" min="0" class="form-control form-control-sm" />
-                    <span class="input-group-text">$</span>
+                    <span class="input-group-text">{{ dollarSign }}</span>
                   </div>
                 </td>
                 <td>
                   <div class="input-group">
                     <input type="number" min="0" class="form-control form-control-sm" />
-                    <span class="input-group-text">SP/week</span>
+                    <span class="input-group-text">{{ developmentVelocityMetric }}</span>
                   </div>
                 </td>
               </tr>
@@ -56,8 +56,8 @@
     </div>
     <div class="container-fluid mt-3 tasks">
       <h4 class="ms-5">Задачі</h4>
-      <div class="row">
-        <div class="col-auto px-0 mx-2 overflow-x-auto table-col">
+      <div class="row overflow-x-auto">
+        <div class="col-auto table-col">
           <table class="table m-0">
             <thead>
               <th></th>
@@ -76,7 +76,7 @@
                 </td>
                 <td>1</td>
                 <td>Створити діаграму</td>
-                <td>8 SP</td>
+                <td>8 {{ storyPointsSign }}</td>
                 <td></td>
                 <td></td>
               </tr>
@@ -95,7 +95,7 @@
                 <td>
                   <div class="input-group">
                     <input type="number" min="0" max="100" class="form-control form-control-sm" />
-                    <span class="input-group-text">SP</span>
+                    <span class="input-group-text">{{ storyPointsSign }}</span>
                   </div>
                 </td>
                 <td>
@@ -153,7 +153,7 @@
                         Струменець Л. Д.
                         <button type="button" class="btn-close"></button>
                       </div>
-                      <div class="col-auto dropdown d-inline-block p-0">
+                      <div class="col-auto d-inline-block p-0 dropdown">
                         <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                           Додати...
                         </button>
@@ -172,10 +172,15 @@
         </div>
       </div>
     </div>
+    <button type="button" class="btn btn-lg btn-primary m-2">Cпланувати проєкт</button>
   </form>
 </template>
 
-<script setup></script>
+<script setup>
+const dollarSign = '$';
+const storyPointsSign = "SP";
+const developmentVelocityMetric = `${storyPointsSign}/тиж.`;
+</script>
 
 <style scoped lang="scss">
 @import "../assets/styles.scss";
@@ -197,11 +202,20 @@
     border-width: 0px;
     margin: -0.25em -0.25em -0.25em -0.25em;
   }
+
+  .btn-close {
+    font-size: 0.75em;
+  }
 }
 
 $td-trashbin-width: 30px;
 $td-id-width: 50px;
 $td-badges-width: 500px;
+$td-worker-name-width: 300px;
+$td-salary-width: 150px;
+$td-task-name-width: 300px;
+$td-velocity-width: 200px;
+$td-complexity-width: 125px;
 
 .workers .table {
 
@@ -223,7 +237,6 @@ $td-badges-width: 500px;
 
   th:nth-child(3),
   td:nth-child(3) {
-    $td-worker-name-width: 300px;
     width: $td-worker-name-width;
     min-width: $td-worker-name-width;
     max-width: $td-worker-name-width;
@@ -231,7 +244,6 @@ $td-badges-width: 500px;
 
   th:nth-child(4),
   td:nth-child(4) {
-    $td-salary-width: 150px;
     width: $td-salary-width;
     min-width: $td-salary-width;
     max-width: $td-salary-width;
@@ -240,7 +252,6 @@ $td-badges-width: 500px;
 
   th:nth-child(5),
   td:nth-child(5) {
-    $td-velocity-width: 200px;
     width: $td-velocity-width;
     min-width: $td-velocity-width;
     max-width: $td-velocity-width;
@@ -268,7 +279,6 @@ $td-badges-width: 500px;
 
   th:nth-child(3),
   td:nth-child(3) {
-    $td-task-name-width: 300px;
     width: $td-task-name-width;
     min-width: $td-task-name-width;
     max-width: $td-task-name-width;
@@ -276,7 +286,6 @@ $td-badges-width: 500px;
 
   th:nth-child(4),
   td:nth-child(4) {
-    $td-complexity-width: 125px;
     width: $td-complexity-width;
     min-width: $td-complexity-width;
     max-width: $td-complexity-width;
