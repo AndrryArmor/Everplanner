@@ -70,7 +70,7 @@
         </div>
       </div>
     </div>
-    <button type="button" class="btn btn-lg btn-primary m-2">Cпланувати проєкт</button>
+    <button type="button" class="btn btn-lg btn-primary m-2" @click="planProject">Cпланувати проєкт</button>
   </form>
 </template>
 
@@ -198,6 +198,10 @@ function addAvailableWorker(taskId, workerId) {
 function deleteAvailableWorker(taskId, workerId) {
   var foundTask = tasks.value.find((task) => task.id == taskId);
   foundTask.availableWorkers = foundTask.availableWorkers.filter((task) => task != workerId);
+}
+
+function planProject() {
+  emit('planProject', tasks, workers);
 }
 </script>
 
