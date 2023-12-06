@@ -24,7 +24,7 @@
               class="btn btn-sm btn-primary dropdown-toggle"
               type="button"
               data-bs-toggle="dropdown"
-              :disabled="!hasAnyParentTasks(task.id)"
+              :disabled="!hasAnyParentTasksToAdd(task.id)"
             >
               Додати задачу
             </button>
@@ -53,12 +53,12 @@
               class="btn btn-sm btn-primary dropdown-toggle"
               type="button"
               data-bs-toggle="dropdown"
-              :disabled="!hasAnyAvailableWorkers(task.id)"
+              :disabled="!hasAnyAvailableWorkersForTaskToAdd(task.id)"
             >
               Додати співробітника
             </button>
             <ul class="col-auto dropdown-menu">
-              <li v-for="worker in getAvailableWorkersForTask(task.id)" :key="worker.id">
+              <li v-for="worker in getAvailableWorkersForTaskToAdd(task.id)" :key="worker.id">
                 <a class="dropdown-item" href="#">{{ worker.name }}</a>
               </li>
             </ul>
@@ -81,18 +81,18 @@ function getAvailableParentTasksToAdd(taskId) {
   );
 }
 
-function hasAnyParentTasks(taskId) {
+function hasAnyParentTasksToAdd(taskId) {
   return getAvailableParentTasksToAdd(taskId).length > 0;
 }
 
-function getAvailableWorkersForTask(taskId) {
+function getAvailableWorkersForTaskToAdd(taskId) {
   return props.workers.filter(
     (worker) => !props.tasks[taskId].availableWorkers.includes(worker.id)
   );
 }
 
-function hasAnyAvailableWorkers(taskId) {
-  return getAvailableWorkersForTask(taskId).length > 0;
+function hasAnyAvailableWorkersForTaskToAdd(taskId) {
+  return getAvailableWorkersForTaskToAdd(taskId).length > 0;
 }
 </script>
 
