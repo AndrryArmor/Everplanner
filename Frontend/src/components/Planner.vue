@@ -6,23 +6,21 @@
         <div class="col-auto table-col">
           <table class="table m-0">
             <thead>
-              <th></th>
-              <th>Id</th>
-              <th>ПІБ</th>
-              <th>Зарплата</th>
-              <th>Швидкість розробки</th>
+              <th v-for="header in workersTableHeaders">
+                {{ header }}
+              </th>
             </thead>
             <tbody>
-              <tr>
+              <tr v-for="worker in workers">
                 <td>
                   <button type="button" class="btn btn-outline-danger p-1 trashbin">
                     <i class="bi bi-trash"></i>
                   </button>
                 </td>
-                <td>1</td>
-                <td>Ачілов А. В.</td>
-                <td>1000</td>
-                <td>15 {{ developmentVelocityMetric }}</td>
+                <td>{{ worker.id }}</td>
+                <td>{{ worker.name }}</td>
+                <td>{{ worker.salary }}{{ dollarSign }}</td>
+                <td>{{ worker.developmentVelocity }} {{ developmentVelocityMetric }}</td>
               </tr>
               <tr>
                 <td>
@@ -31,20 +29,21 @@
                   </button>
                 </td>
                 <td>
-                  2
+                  {{ newWorker.id }}
                 </td>
                 <td>
-                  <input type="text" class="form-control form-control-sm" />
+                  <input type="text" class="form-control form-control-sm" v-model="newWorker.name" />
                 </td>
                 <td>
                   <div class="input-group">
-                    <input type="number" min="0" class="form-control form-control-sm" />
+                    <input type="number" min="0" class="form-control form-control-sm" v-model="newWorker.salary" />
                     <span class="input-group-text">{{ dollarSign }}</span>
                   </div>
                 </td>
                 <td>
                   <div class="input-group">
-                    <input type="number" min="0" class="form-control form-control-sm" />
+                    <input type="number" min="0" class="form-control form-control-sm"
+                      v-model="newWorker.developmentVelocity" />
                     <span class="input-group-text">{{ developmentVelocityMetric }}</span>
                   </div>
                 </td>
@@ -60,25 +59,64 @@
         <div class="col-auto table-col">
           <table class="table m-0">
             <thead>
-              <th></th>
-              <th>Id</th>
-              <th>Назва задачі</th>
-              <th>Складність</th>
-              <th>Залежить від</th>
-              <th>Доступні співробітники для виконання</th>
+              <th v-for="header in tasksTableHeaders">
+                {{ header }}
+              </th>
             </thead>
             <tbody>
-              <tr>
+              <tr v-for="task in tasks" :key="task.id">
                 <td>
                   <button type="button" class="btn btn-outline-danger p-1 trashbin">
                     <i class="bi bi-trash"></i>
                   </button>
                 </td>
-                <td>1</td>
-                <td>Створити діаграму</td>
-                <td>8 {{ storyPointsSign }}</td>
-                <td></td>
-                <td></td>
+                <td>{{ task.id }}</td>
+                <td>{{ task.name }}</td>
+                <td>{{ task.complexity }} {{ storyPointsSign }}</td>
+                <td>
+                  <div class="container-fluid">
+                    <div class="row gap-1">
+                      <div v-for="parentTask in task.parentTasks" :key="parentTask"
+                        class="col-auto border-primary text-primary inline-item">
+                        {{ tasks[parentTask].name }}
+                        <button type="button" class="btn-close"></button>
+                      </div>
+                      <div class="col-auto dropdown p-0">
+                        <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                          :disabled="!hasAnyParentTasks(task.id)">
+                          Додати задачу
+                        </button>
+                        <ul class="dropdown-menu">
+                          <li v-for="taskToAdd in getAvailableParentTasksToAdd(task.id)" :key="taskToAdd.id">
+                            <a class="dropdown-item" href="#">{{ taskToAdd.name }}</a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="container-fluid">
+                    <div class="row gap-1">
+                      <div v-for="worker in task.availableWorkers" :key="worker.id"
+                        class="col-auto border-primary text-primary inline-item">
+                        {{ workers[worker].name }}
+                        <button type="button" class="btn-close"></button>
+                      </div>
+                      <div class="col-auto p-0 dropdown">
+                        <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                          :disabled="!hasAnyAvailableWorkers(task.id)">
+                          Додати співробітника
+                        </button>
+                        <ul class="col-auto dropdown-menu">
+                          <li v-for="worker in getAvailableWorkersForTask(task.id)" :key="worker.id">
+                            <a class="dropdown-item" href="#">{{ worker.name }}</a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </td>
               </tr>
               <tr>
                 <td>
@@ -87,14 +125,15 @@
                   </button>
                 </td>
                 <td>
-                  2
+                  {{ newTask.id }}
                 </td>
                 <td>
-                  <input type="text" class="form-control form-control-sm" />
+                  <input type="text" class="form-control form-control-sm" v-model="newTask.name" />
                 </td>
                 <td>
                   <div class="input-group">
-                    <input type="number" min="0" max="100" class="form-control form-control-sm" />
+                    <input type="number" min="0" max="100" class="form-control form-control-sm"
+                      v-model="newTask.complexity" />
                     <span class="input-group-text">{{ storyPointsSign }}</span>
                   </div>
                 </td>
@@ -177,9 +216,86 @@
 </template>
 
 <script setup>
+import { ref, computed } from "vue";
+
 const dollarSign = '$';
 const storyPointsSign = "SP";
 const developmentVelocityMetric = `${storyPointsSign}/тиж.`;
+
+const workersTableHeaders = ["", "ID", "ПІБ", "Зарплата", "Швидкість розробки"];
+const workers = ref([
+  {
+    id: 0,
+    name: "Ачілов А. В.",
+    salary: 1000,
+    developmentVelocity: 15
+  },
+  {
+    id: 1,
+    name: "Хвостенко О. Д.",
+    salary: 800,
+    developmentVelocity: 10
+  }
+]);
+const newWorker = ref({
+  id: getNewWorkerId(),
+  name: "",
+  salary: null,
+  developmentVelocity: null
+});
+
+function getNewWorkerId() {
+  var sortedWorkers = workers.value.toSorted((worker1, worker2) => worker1.id - worker2.id);
+  return sortedWorkers[sortedWorkers.length - 1].id + 1;
+};
+
+const tasksTableHeaders = ["", "ID", "Назва задачі", "Складність", "Залежить від", "Доступні співробітники для виконання"];
+const tasks = ref([
+  {
+    id: 0,
+    name: "Створити діаграму",
+    complexity: 8,
+    parentTasks: [],
+    availableWorkers: [0, 1]
+  },
+  {
+    id: 1,
+    name: "Додати додавання спіробітників та задач",
+    complexity: 15,
+    parentTasks: [0],
+    availableWorkers: [1]
+  }
+]);
+const newTask = ref({
+  id: getNewTaskId(),
+  name: "",
+  complexity: null,
+  parentTasks: [],
+  availableWorkers: []
+});
+
+function getNewTaskId() {
+  var sortedTasks = tasks.value.toSorted((task1, task2) => task1.id - task2.id);
+  return sortedTasks[sortedTasks.length - 1].id + 1;
+};
+
+function getAvailableParentTasksToAdd(taskId) {
+  return tasks.value.filter((task) =>
+    task.id != taskId && !tasks.value[taskId].parentTasks.includes(task.id));
+}
+
+function hasAnyParentTasks(taskId) {
+  return getAvailableParentTasksToAdd(taskId).length > 0;
+}
+
+function getAvailableWorkersForTask(taskId) {
+  return workers.value.filter((worker) =>
+    !tasks.value[taskId].availableWorkers.includes(worker.id));
+}
+
+function hasAnyAvailableWorkers(taskId) {
+  return getAvailableWorkersForTask(taskId).length > 0;
+}
 </script>
 
 <style scoped lang="scss">
