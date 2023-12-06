@@ -1,22 +1,28 @@
 <template>
   <tr>
     <td>
-      <button type="button" class="btn btn-outline-danger p-1 trashbin">
-        <i class="bi bi-trash"></i>
+      <button type="button" class="btn btn-outline-success p-1 action" @click="addNewTask">
+        <i class="bi bi-check-square"></i>
       </button>
     </td>
     <td>{{ newTask.id }}</td>
     <td>
-      <input type="text" class="form-control form-control-sm" v-model="newTask.name" />
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        v-model="newTask.name"
+        placeholder="Назва задачі"
+      />
     </td>
     <td>
-      <div class="input-group">
+      <div class="input-group input-group-sm">
         <input
           type="number"
           min="0"
           max="100"
-          class="form-control form-control-sm"
+          class="form-control"
           v-model="newTask.complexity"
+          placeholder="0"
         />
         <span class="input-group-text">{{ storyPointsSign }}</span>
       </div>
@@ -29,21 +35,27 @@
             :key="parentTaskId"
             class="col-auto border-primary text-primary inline-item"
           >
-            {{ tasks[parentTaskId].name }}
-            <button type="button" class="btn-close"></button>
+            {{ tasks.find((t) => t.id == parentTaskId).name }}
+            <button
+              type="button"
+              class="btn-close"
+              @click="deleteParentTask(parentTaskId)"
+            ></button>
           </div>
           <div class="col-auto dropdown p-0">
             <button
               class="btn btn-sm btn-primary dropdown-toggle"
               type="button"
               data-bs-toggle="dropdown"
-              :disabled="!hasAnyParentTasksToAdd()"
+              :disabled="!hasAnyParentTasksToAdd"
             >
               Додати задачу
             </button>
-            <ul class="dropdown-menu">
-              <li v-for="taskToAdd in getAvailableParentTasksToAdd()" :key="taskToAdd.id">
-                <a class="dropdown-item" href="#">{{ taskToAdd.name }}</a>
+            <ul ref="dropdownAddParentTask" class="dropdown-menu">
+              <li v-for="parentTask in availableParentTasksToAdd" :key="parentTask.id">
+                <a class="dropdown-item" href="#" @click="addParentTask(parentTask.id)">
+                  {{ parentTask.name }}
+                </a>
               </li>
             </ul>
           </div>
@@ -58,21 +70,27 @@
             :key="workerId"
             class="col-auto border-primary text-primary inline-item"
           >
-            {{ workers[workerId].name }}
-            <button type="button" class="btn-close"></button>
+            {{ workers.find((w) => w.id == workerId).name }}
+            <button
+              type="button"
+              class="btn-close"
+              @click="deleteAvailableWorker(workerId)"
+            ></button>
           </div>
           <div class="col-auto p-0 dropdown">
             <button
               class="btn btn-sm btn-primary dropdown-toggle"
               type="button"
               data-bs-toggle="dropdown"
-              :disabled="!hasAnyAvailableWorkersForTaskToAdd()"
+              :disabled="!hasAnyAvailableWorkersForTaskToAdd"
             >
               Додати співробітника
             </button>
-            <ul class="col-auto dropdown-menu">
-              <li v-for="worker in getAvailableWorkersForTaskToAdd()" :key="worker.id">
-                <a class="dropdown-item" href="#">{{ worker.name }}</a>
+            <ul ref="dropdownAddAvailableWorker" class="col-auto dropdown-menu">
+              <li v-for="worker in availableWorkersForTaskToAdd" :key="worker.id">
+                <a class="dropdown-item" href="#" @click="addAvailableWorker(worker.id)">
+                  {{ worker.name }}
+                </a>
               </li>
             </ul>
           </div>
@@ -83,33 +101,65 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watchEffect } from "vue";
 
 const props = defineProps(["newTaskId", "tasks", "workers", "storyPointsSign"]);
-const emit = defineEmits(["addTask", "addParentTask", "addAvailableWorker"]);
+const emit = defineEmits(["addNewTask"]);
 
-const newTask = ref({
-  id: props.newTaskId,
-  name: "",
-  complexity: null,
-  parentTasks: [],
-  availableWorkers: [],
+const dropdownAddParentTask = ref(null);
+const dropdownAddAvailableWorker = ref(null);
+
+var newTask = resetNewTask();
+function resetNewTask() {
+  return ref({
+    id: props.newTaskId,
+    name: "",
+    complexity: null,
+    parentTasks: [],
+    availableWorkers: [],
+  });
+}
+watchEffect(() => (newTask.value.id = props.newTaskId));
+
+const availableParentTasksToAdd = computed(() => {
+  return props.tasks.filter((task) => !newTask.value.parentTasks.includes(task.id));
 });
 
-function getAvailableParentTasksToAdd() {
-  return props.tasks.filter((task) => !newTask.value.parentTasks.includes(task.id));
-}
+const hasAnyParentTasksToAdd = computed(() => {
+  return availableParentTasksToAdd.value.length > 0;
+});
 
-function hasAnyParentTasksToAdd() {
-  return getAvailableParentTasksToAdd().length > 0;
-}
-
-function getAvailableWorkersForTaskToAdd() {
+const availableWorkersForTaskToAdd = computed(() => {
   return props.workers.filter((worker) => !newTask.value.availableWorkers.includes(worker.id));
+});
+
+const hasAnyAvailableWorkersForTaskToAdd = computed(() => {
+  return availableWorkersForTaskToAdd.value.length > 0;
+});
+
+function addNewTask() {
+  emit("addNewTask", newTask.value);
+  newTask = resetNewTask();
 }
 
-function hasAnyAvailableWorkersForTaskToAdd() {
-  return getAvailableWorkersForTaskToAdd().length > 0;
+function addParentTask(parentTaskId) {
+  newTask.value.parentTasks = [...newTask.value.parentTasks, parentTaskId];
+  dropdownAddParentTask.value.classList.remove("show");
+}
+
+function deleteParentTask(parentTaskId) {
+  newTask.value.parentTasks = newTask.value.parentTasks.filter((task) => task != parentTaskId);
+}
+
+function addAvailableWorker(workerId) {
+  newTask.value.availableWorkers = [...newTask.value.availableWorkers, workerId];
+  dropdownAddAvailableWorker.value.classList.remove("show");
+}
+
+function deleteAvailableWorker(workerId) {
+  newTask.value.availableWorkers = newTask.value.availableWorkers.filter(
+    (worker) => worker != workerId
+  );
 }
 </script>
 

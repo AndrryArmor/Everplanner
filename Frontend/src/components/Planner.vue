@@ -6,9 +6,11 @@
         <div class="col-auto">
           <table class="table m-0">
             <thead>
-              <th v-for="header in workersTableHeaders">
-                {{ header }}
-              </th>
+              <tr>
+                <th v-for="header in workersTableHeaders">
+                  {{ header }}
+                </th>
+              </tr>
             </thead>
             <tbody>
               <PlannerWorker
@@ -17,11 +19,13 @@
                 :worker="worker"
                 :dollar-sign="dollarSign"
                 :development-velocity-metric="developmentVelocityMetric"
+                @delete-worker="deleteWorker"
               />
               <PlannerNewWorker
-                :new-worker-id="getNewWorkerId()"
+                :new-worker-id="newWorkerId"
                 :dollar-sign="dollarSign"
                 :development-velocity-metric="developmentVelocityMetric"
+                @add-new-worker="addNewWorker"
               />
             </tbody>
           </table>
@@ -34,9 +38,11 @@
         <div class="col-auto">
           <table class="table m-0">
             <thead>
-              <th v-for="header in tasksTableHeaders">
-                {{ header }}
-              </th>
+              <tr>
+                <th v-for="header in tasksTableHeaders">
+                  {{ header }}
+                </th>
+              </tr>
             </thead>
             <tbody>
               <PlannerTask
@@ -46,12 +52,18 @@
                 :tasks="tasks"
                 :workers="workers"
                 :story-points-sign="storyPointsSign"
+                @delete-task="deleteTask"
+                @add-parent-task="addParentTask"
+                @delete-parent-task="deleteParentTask"
+                @add-available-worker="addAvailableWorker"
+                @delete-available-worker="deleteAvailableWorker"
               />
               <PlannerNewTask
-                :new-task-id="getNewTaskId()"
+                :new-task-id="newTaskId"
                 :tasks="tasks"
                 :workers="workers"
                 :story-points-sign="storyPointsSign"
+                @add-new-task="addNewTask"
               />
             </tbody>
           </table>
@@ -63,11 +75,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watchEffect } from "vue";
 import PlannerWorker from "./PlannerWorker.vue";
 import PlannerNewWorker from "./PlannerNewWorker.vue";
 import PlannerTask from "./PlannerTask.vue";
 import PlannerNewTask from "./PlannerNewTask.vue";
+
+const emit = defineEmits(["planProject"]);
 
 const dollarSign = "$";
 const storyPointsSign = "SP";
@@ -89,9 +103,21 @@ const workers = ref([
   },
 ]);
 
-function getNewWorkerId() {
-  var sortedWorkers = workers.value.toSorted((worker1, worker2) => worker1.id - worker2.id);
+const newWorkerId = computed(() => {
+  if (workers.value.length === 0) {
+    return 0;
+  }
+
+  const sortedWorkers = [...workers.value].sort((worker1, worker2) => worker1.id - worker2.id);
   return sortedWorkers[sortedWorkers.length - 1].id + 1;
+});
+
+function addNewWorker(worker) {
+  workers.value = [...workers.value, worker];
+}
+
+function deleteWorker(workerId) {
+  workers.value = workers.value.filter((worker) => worker.id != workerId);
 }
 
 const tasksTableHeaders = [
@@ -119,9 +145,59 @@ const tasks = ref([
   },
 ]);
 
-function getNewTaskId() {
-  var sortedTasks = tasks.value.toSorted((task1, task2) => task1.id - task2.id);
+const newTaskId = computed(() => {
+  if (tasks.value.length === 0) {
+    return 0;
+  }
+
+  var sortedTasks = [...tasks.value].sort((task1, task2) => task1.id - task2.id);
   return sortedTasks[sortedTasks.length - 1].id + 1;
+});
+
+// Видаляє неіснуючі батьківські задачі зі списку батьків кожної з задач
+// і неіснуючих співробітників із списку доступнимх співробітників кожної з задач.
+watchEffect(() => {
+  tasks.value.forEach((task) => {
+    task.parentTasks = task.parentTasks.filter((parentTask) => {
+      // Шукає чи є серед усіх задач хоча б одна, яка дорівнює parentTask.
+      // Якщо нема - значить parentTask це видалена задача.
+      return tasks.value.some((t) => t.id == parentTask);
+    });
+
+    task.availableWorkers = task.availableWorkers.filter((worker) => {
+      // Шукає чи є серед усіх співробітників хоча б один, який дорівнює worker.
+      // Якщо нема - значить worker це видалений співробітник.
+      return workers.value.some((w) => w.id == worker);
+    });
+  });
+});
+
+function addNewTask(task) {
+  tasks.value = [...tasks.value, task];
+}
+
+function deleteTask(taskId) {
+  tasks.value = tasks.value.filter((task) => task.id != taskId);
+}
+
+function addParentTask(taskId, parentTaskId) {
+  var foundTask = tasks.value.find((task) => task.id == taskId);
+  foundTask.parentTasks = [...foundTask.parentTasks, parentTaskId];
+}
+
+function deleteParentTask(taskId, parentTaskId) {
+  var foundTask = tasks.value.find((task) => task.id == taskId);
+  foundTask.parentTasks = foundTask.parentTasks.filter((task) => task != parentTaskId);
+}
+
+function addAvailableWorker(taskId, workerId) {
+  var foundTask = tasks.value.find((task) => task.id == taskId);
+  foundTask.availableWorkers = [...foundTask.availableWorkers, workerId];
+}
+
+function deleteAvailableWorker(taskId, workerId) {
+  var foundTask = tasks.value.find((task) => task.id == taskId);
+  foundTask.availableWorkers = foundTask.availableWorkers.filter((task) => task != workerId);
 }
 </script>
 
@@ -133,9 +209,14 @@ function getNewTaskId() {
     text-align: center;
   }
 
-  :deep(td) button.trashbin {
-    border-width: 0px;
-    margin: -0.25em -0.25em -0.25em -0.25em;
+  :deep(td) {
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
+
+    button.action {
+      border-width: 0px;
+      margin: -0.25em -0.25em -0.25em -0.25em;
+    }
   }
 
   :deep(.btn-close) {
@@ -249,5 +330,11 @@ $td-complexity-width: 125px;
 
 :deep(.dropdown) {
   position: static;
+
+  .dropdown-menu {
+    height: auto;
+    max-height: 200px;
+    overflow-x: hidden;
+  }
 }
 </style>

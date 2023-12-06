@@ -1,35 +1,40 @@
 <template>
   <tr>
     <td>
-      <button type="button" class="btn btn-outline-danger p-1 trashbin">
-        <i class="bi bi-trash"></i>
+      <button type="button" class="btn btn-outline-success p-1 action" @click="addNewWorker">
+        <i class="bi bi-check-square"></i>
       </button>
     </td>
+    <td>{{ newWorker.id }}</td>
     <td>
-      {{ newWorker.id }}
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        v-model="newWorker.name"
+        placeholder="ПІБ"
+      />
     </td>
     <td>
-      <input type="text" class="form-control form-control-sm" v-model="newWorker.name" />
-    </td>
-    <td>
-      <div class="input-group">
+      <div class="input-group input-group-sm">
         <input
           type="number"
           min="0"
-          class="form-control form-control-sm"
+          class="form-control"
           v-model="newWorker.salary"
+          placeholder="0"
         />
         <span class="input-group-text">{{ dollarSign }}</span>
       </div>
     </td>
     <td>
-      <div class="input-group">
+      <div class="input-group input-group-sm">
         <input
           type="number"
           min="0"
           max="1000"
-          class="form-control form-control-sm"
+          class="form-control"
           v-model="newWorker.developmentVelocity"
+          placeholder="0"
         />
         <span class="input-group-text">{{ developmentVelocityMetric }}</span>
       </div>
@@ -38,17 +43,26 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, watchEffect } from "vue";
 
 const props = defineProps(["newWorkerId", "dollarSign", "developmentVelocityMetric"]);
-const emit = defineEmits(["addWorker"]);
+const emit = defineEmits(["addNewWorker"]);
 
-const newWorker = ref({
-  id: props.newWorkerId,
-  name: "",
-  salary: null,
-  developmentVelocity: null,
-});
+var newWorker = resetNewWorker();
+function resetNewWorker() {
+  return ref({
+    id: props.newWorkerId,
+    name: "",
+    salary: null,
+    developmentVelocity: null,
+  });
+}
+watchEffect(() => (newWorker.value.id = props.newWorkerId));
+
+function addNewWorker() {
+  emit("addNewWorker", newWorker.value);
+  newWorker = resetNewWorker();
+}
 </script>
 
 <style scoped lang="scss"></style>

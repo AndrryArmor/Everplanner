@@ -1,7 +1,7 @@
 <template>
   <tr>
     <td>
-      <button type="button" class="btn btn-outline-danger p-1 trashbin">
+      <button type="button" class="btn btn-outline-danger p-1 action" @click="deleteWorker">
         <i class="bi bi-trash"></i>
       </button>
     </td>
@@ -13,10 +13,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-
 const props = defineProps(["worker", "dollarSign", "developmentVelocityMetric"]);
 const emit = defineEmits(["deleteWorker"]);
+
+function deleteWorker() {
+  emit("deleteWorker", props.worker.id);
+}
 </script>
 
 <style scoped lang="scss"></style>
