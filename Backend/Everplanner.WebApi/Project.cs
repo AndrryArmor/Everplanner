@@ -20,6 +20,7 @@ public class Project
     public IReadOnlyCollection<Task> Tasks => _tasks;
     public IReadOnlyCollection<Worker> Workers => _workers;
     public double EndingTime { get; private set; }
+    public int UsedWorkersCount { get; private set; }
 
     public static Project? BuildProject(ProjectRequestModel projectRequestModel)
     {
@@ -134,8 +135,21 @@ public class Project
             Console.WriteLine();
         }
 
-        Task lastTask = tasksByPriority.Last();
-        EndingTime = lastTask.ExecutionStart + lastTask.ExecutionDuration;
+        EndingTime = tasksByPriority.Max(task => task.ExecutionStart + task.ExecutionDuration);
+        UsedWorkersCount = CountUsedWorkers();
+    }
+
+    private int CountUsedWorkers()
+    {
+        var uniqueWorkers = new HashSet<Worker>();
+        _tasks.ForEach(task =>
+        {
+            if (task.Executor is not null)
+            {
+                uniqueWorkers.Add(task.Executor);
+            }
+        });
+        return uniqueWorkers.Count;
     }
 
     public void PrintProjectWorkInfo()
@@ -153,6 +167,7 @@ public class Project
         var tasksForExport = project.Tasks
             .Select(t => new TaskResponseModel(t.Id, t.Name, t.ExecutionStart, t.ExecutionDuration, t.Executor!.Id));
         var workersForExport = project.Workers.Select(w => new WorkerResponseModel(w.Id, w.Name));
-        return new PlannedProjectResponseModel(project.Id, project.Name, tasksForExport, workersForExport);
+        return new PlannedProjectResponseModel(project.Id, project.Name, tasksForExport, workersForExport,
+            project.EndingTime, project.UsedWorkersCount);
     }
 }
