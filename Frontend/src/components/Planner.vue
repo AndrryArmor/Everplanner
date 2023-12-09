@@ -70,7 +70,9 @@
         </div>
       </div>
     </div>
-    <button type="button" class="btn btn-lg btn-primary m-2" @click="planProject">Cпланувати проєкт</button>
+    <button type="button" class="btn btn-lg btn-primary m-2" @click="planProject">
+      Cпланувати проєкт
+    </button>
   </form>
 </template>
 
@@ -201,7 +203,7 @@ function deleteAvailableWorker(taskId, workerId) {
 }
 
 function planProject() {
-  emit('planProject', tasks, workers);
+  emit("planProject", tasks.value, workers.value);
 }
 </script>
 
