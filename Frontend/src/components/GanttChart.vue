@@ -1,7 +1,17 @@
 <template>
-  <div class="container-fluid text-center mt-3">
-    <h4>Діаграма Ганта для проєкту "{{ projectName }}":</h4>
-    <BarChart :chart-data="chartData" :options="chartOptions" :style="style" />
+  <div class="m-3">
+    <h4 class="ms-5">
+      Результати планування проєкту "{{ projectStats.name }}" за мінімальний час:
+    </h4>
+    <p>
+      Час виконання проєкту: <b>{{ projectStats.endingTime }} днів</b><br />
+      Необхідна кількість працівників:
+      <b>{{ projectStats.usedWorkers }}/{{ projectStats.workers }}</b>
+    </p>
+    Діаграма Ганта:
+    <div class="overflow-x-auto">
+      <BarChart :chart-data="chartData" :options="chartOptions" :style="style" />
+    </div>
     <button type="button" class="btn btn-lg btn-primary m-2" @click="backToPlanning">
       Назад до планування проєкту
     </button>
@@ -20,14 +30,15 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  projectName: {
-    type: String,
+  projectStats: {
+    type: Object,
     reqiured: true,
   },
 });
 const emit = defineEmits(["backToPlanning"]);
 
 const chartOptions = {
+  responsive: true,
   indexAxis: "y",
   scales: {
     x: {
@@ -98,9 +109,10 @@ const chartOptions = {
   },
 };
 const style = {
-  height: "500px",
-  width: "1500px",
-  position: "relative",
+  width: `max(100vw, ${500 + 31 * props.projectStats.endingTime}px)`,
+  "max-width": `max(100vw - 2em, ${500 + 31 * props.projectStats.endingTime}px)`,
+  height: `max(100px + 25vh, ${100 + 40 * props.projectStats.tasks}px)`,
+  "max-height": `max(100px + 25vh, ${100 + 40 * props.projectStats.tasks}px)`,
 };
 
 function backToPlanning() {

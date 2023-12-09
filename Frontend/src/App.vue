@@ -2,11 +2,12 @@
   <Planner
     v-if="mode === Modes.ShowPlanner"
     @plan-project-for-minimal-time="planProjectForMinimalTime"
+    @plan-project-for-minimal-workers-count="planProjectForMinimalWorkersCount"
   />
   <GanttChart
     v-else-if="mode === Modes.ShowChart"
     :chart-data="chartData"
-    :project-name="projectName"
+    :project-stats="projectStats"
     @back-to-planning="backToPlanning"
   />
 </template>
@@ -23,9 +24,46 @@ const Modes = {
 
 const mode = ref(Modes.ShowPlanner);
 const chartData = ref(null);
-const projectName = ref(null);
+const projectStats = ref(null);
 
 async function planProjectForMinimalTime(tasks, workers) {
+  //const project = getTemplateProject();
+  const project = {
+    id: 0,
+    name: "Test project",
+    tasks: tasks,
+    workers: workers,
+  };
+  var chartDataResponse;
+  try {
+    chartDataResponse = await fetch("https://localhost:7229/Everplanner/PlanProject", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(project),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(JSON.parse(text).detail);
+        }
+        return response.json();
+      })
+      .then((projectData) => {
+        return generateChartDataFromPlannedProject(projectData);
+      });
+  } catch (error) {
+    alert(`Проєкт не вдалося спланувати через наступну помилку: ${error.message}`);
+  }
+
+  if (chartDataResponse) {
+    chartData.value = chartDataResponse;
+    mode.value = Modes.ShowChart;
+  }
+}
+
+async function planProjectForMinimalWorkersCount(tasks, workers) {
   //const project = getTemplateProject();
   const project = {
     id: 0,
@@ -168,7 +206,14 @@ function getTemplateProject() {
 }
 
 function generateChartDataFromPlannedProject(project) {
-  projectName.value = project.name;
+  projectStats.value = {
+    name: project.name,
+    endingTime: project.endingTime,
+    tasks: project.tasks.length,
+    workers: project.workers.length,
+    usedWorkers: project.usedWorkersCount,
+  };
+
   const labels = new Array(project.tasks.length);
   const shift = new Array(project.tasks.length);
   const workerBars = project.workers.map((worker) => {

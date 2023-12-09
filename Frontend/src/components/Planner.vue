@@ -70,9 +70,24 @@
         </div>
       </div>
     </div>
-    <button type="button" class="btn btn-lg btn-primary m-2" @click="planProject">
-      Cпланувати проєкт
-    </button>
+    <div class="container-fluid my-3 actions">
+      <div class="row gy-3">
+        <div class="col-lg-auto">
+          <button type="button" class="btn btn-lg btn-primary" @click="planProjectForMinimalTime">
+            Cпланувати проєкт за мінімальний час
+          </button>
+        </div>
+        <div class="col-lg-auto">
+          <button
+            type="button"
+            class="btn btn-lg btn-primary"
+            @click="planProjectForMinimalWorkersCount"
+          >
+            Cпланувати проєкт за мінімальну кількість працівників
+          </button>
+        </div>
+      </div>
+    </div>
   </form>
 </template>
 
@@ -83,7 +98,7 @@ import PlannerNewWorker from "./PlannerNewWorker.vue";
 import PlannerTask from "./PlannerTask.vue";
 import PlannerNewTask from "./PlannerNewTask.vue";
 
-const emit = defineEmits(["planProject"]);
+const emit = defineEmits(["planProjectForMinimalTime", "planProjectForMinimalWorkersCount"]);
 
 const dollarSign = "$";
 const storyPointsSign = "SP";
@@ -202,8 +217,12 @@ function deleteAvailableWorker(taskId, workerId) {
   foundTask.availableWorkers = foundTask.availableWorkers.filter((task) => task != workerId);
 }
 
-function planProject() {
-  emit("planProject", tasks.value, workers.value);
+function planProjectForMinimalTime() {
+  emit("planProjectForMinimalTime", tasks.value, workers.value);
+}
+
+function planProjectForMinimalWorkersCount() {
+  emit("planProjectForMinimalWorkersCount", tasks.value, workers.value);
 }
 </script>
 
@@ -227,6 +246,23 @@ function planProject() {
 
   :deep(.btn-close) {
     font-size: 0.75em;
+  }
+
+  :deep(.inline-item) {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  :deep(.dropdown) {
+    position: static;
+
+    .dropdown-menu {
+      height: auto;
+      max-height: 200px;
+      overflow-x: hidden;
+    }
   }
 }
 
@@ -327,20 +363,7 @@ $td-complexity-width: 125px;
   }
 }
 
-:deep(.inline-item) {
-  padding: 0.25rem 0.5rem;
-  border: 1px solid;
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-}
-
-:deep(.dropdown) {
-  position: static;
-
-  .dropdown-menu {
-    height: auto;
-    max-height: 200px;
-    overflow-x: hidden;
-  }
+.actions button {
+  width: 100%;
 }
 </style>
