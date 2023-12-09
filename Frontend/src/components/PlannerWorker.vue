@@ -13,7 +13,20 @@
 </template>
 
 <script setup>
-const props = defineProps(["worker", "dollarSign", "developmentVelocityMetric"]);
+const props = defineProps({
+  worker: {
+    type: Object,
+    required: true,
+  },
+  dollarSign: {
+    type: String,
+    required: true,
+  },
+  developmentVelocityMetric: {
+    type: String,
+    required: true,
+  },
+});
 const emit = defineEmits(["deleteWorker"]);
 
 function deleteWorker() {

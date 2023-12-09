@@ -85,7 +85,24 @@
 <script setup>
 import { ref, computed } from "vue";
 
-const props = defineProps(["task", "tasks", "workers", "storyPointsSign"]);
+const props = defineProps({
+  task: {
+    type: Object,
+    required: true,
+  },
+  tasks: {
+    type: Array,
+    required: true,
+  },
+  workers: {
+    type: Array,
+    required: true,
+  },
+  storyPointsSign: {
+    type: String,
+    required: true,
+  },
+});
 const emit = defineEmits([
   "deleteTask",
   "addParentTask",

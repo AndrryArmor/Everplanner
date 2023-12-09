@@ -103,7 +103,24 @@
 <script setup>
 import { ref, computed, watchEffect } from "vue";
 
-const props = defineProps(["newTaskId", "tasks", "workers", "storyPointsSign"]);
+const props = defineProps({
+  newTaskId: {
+    type: Number,
+    required: true,
+  },
+  tasks: {
+    type: Array,
+    required: true,
+  },
+  workers: {
+    type: Array,
+    required: true,
+  },
+  storyPointsSign: {
+    type: String,
+    required: true,
+  },
+});
 const emit = defineEmits(["addNewTask"]);
 
 const dropdownAddParentTask = ref(null);

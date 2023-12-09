@@ -8,14 +8,23 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { BarChart } from "vue-chart-3";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import autocolors from "chartjs-plugin-autocolors";
 import { Chart, registerables } from "chart.js";
 Chart.register(...registerables, ChartDataLabels, autocolors);
 
-const props = defineProps(["chartData", "projectName"]);
+const props = defineProps({
+  chartData: {
+    type: Object,
+    required: true,
+  },
+  projectName: {
+    type: String,
+    reqiured: true,
+  },
+});
 const emit = defineEmits(["backToPlanning"]);
 
 const chartOptions = {
@@ -50,7 +59,7 @@ const chartOptions = {
         font: {
           size: 16,
         },
-        callback: function (value: any, index: any) {
+        callback: function (value, index) {
           var label = this.getLabelForValue(value);
           return label.length > 30 ? label.slice(0, 29) + "..." : label;
         },
@@ -61,7 +70,7 @@ const chartOptions = {
     legend: {
       display: true,
       labels: {
-        filter: function (item: any, context: any) {
+        filter: function (item, context) {
           return item.text !== undefined;
         },
       },
@@ -73,13 +82,13 @@ const chartOptions = {
       font: {
         size: 16,
       },
-      formatter: (value: any, context: any) => {
+      formatter: (value, context) => {
         return context.dataset.label;
       },
-      display: (context: any) => {
+      display: (context) => {
         return context.dataset.data[context.dataIndex] !== 0;
       },
-      color: (context: any) => {
+      color: (context) => {
         return isLightColor(context.dataset.backgroundColor) ? "dimgrey" : "lightgray";
       },
     },
@@ -98,7 +107,7 @@ function backToPlanning() {
   emit("backToPlanning");
 }
 
-function isLightColor(color: any) {
+function isLightColor(color) {
   const rgb = color.match(/\d+/g).map(Number);
   const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
   return brightness > 128;

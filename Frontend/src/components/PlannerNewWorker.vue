@@ -45,7 +45,20 @@
 <script setup>
 import { ref, watchEffect } from "vue";
 
-const props = defineProps(["newWorkerId", "dollarSign", "developmentVelocityMetric"]);
+const props = defineProps({
+  newWorkerId: {
+    type: Number,
+    required: true,
+  },
+  dollarSign: {
+    type: String,
+    required: true,
+  },
+  developmentVelocityMetric: {
+    type: String,
+    required: true,
+  },
+});
 const emit = defineEmits(["addNewWorker"]);
 
 var newWorker = resetNewWorker();

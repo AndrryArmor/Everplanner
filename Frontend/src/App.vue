@@ -1,5 +1,8 @@
 <template>
-  <Planner v-if="mode === Modes.ShowPlanner" @plan-project="planProject" />
+  <Planner
+    v-if="mode === Modes.ShowPlanner"
+    @plan-project-for-minimal-time="planProjectForMinimalTime"
+  />
   <GanttChart
     v-else-if="mode === Modes.ShowChart"
     :chart-data="chartData"
@@ -19,10 +22,10 @@ const Modes = {
 };
 
 const mode = ref(Modes.ShowPlanner);
-const chartData = ref();
-const projectName = ref();
+const chartData = ref(null);
+const projectName = ref(null);
 
-async function planProject(tasks, workers) {
+async function planProjectForMinimalTime(tasks, workers) {
   //const project = getTemplateProject();
   const project = {
     id: 0,
