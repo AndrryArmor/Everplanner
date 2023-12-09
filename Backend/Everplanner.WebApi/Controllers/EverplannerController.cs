@@ -16,7 +16,7 @@ public class EverplannerController : ControllerBase
         Project? project = Project.BuildProject(projectRequestModel);
         if (project is null)
         {
-            return Problem("Project build failed.");
+            return Problem("Створення проєкту не відбулося через помилку в даних.");
         }
 
         project.PlanProject();

@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid text-center mt-3">
-    <h4>Діаграма Ганта для проєкту:</h4>
+    <h4>Діаграма Ганта для проєкту "{{ projectName }}":</h4>
     <BarChart :chart-data="chartData" :options="chartOptions" :style="style" />
     <button type="button" class="btn btn-lg btn-primary m-2" @click="backToPlanning">
       Назад до планування проєкту
@@ -15,7 +15,7 @@ import autocolors from "chartjs-plugin-autocolors";
 import { Chart, registerables } from "chart.js";
 Chart.register(...registerables, ChartDataLabels, autocolors);
 
-const props = defineProps(["chartData"]);
+const props = defineProps(["chartData", "projectName"]);
 const emit = defineEmits(["backToPlanning"]);
 
 const chartOptions = {
