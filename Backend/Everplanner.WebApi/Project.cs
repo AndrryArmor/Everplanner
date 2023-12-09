@@ -7,25 +7,31 @@ public class Project
     private readonly List<Task> _tasks;
     private readonly List<Worker> _workers;
 
-    private Project(string name, IEnumerable<Task> tasks, IEnumerable<Worker> workers)
+    private Project(int id, string name, IEnumerable<Task> tasks, IEnumerable<Worker> workers)
     {
+        Id = id;
         Name = name;
         _tasks = tasks.ToList();
         _workers = workers.ToList();
     }
 
+    public int Id { get; }
     public string Name { get; }
     public IReadOnlyCollection<Task> Tasks => _tasks;
     public IReadOnlyCollection<Worker> Workers => _workers;
     public double EndingTime { get; private set; }
 
-    public static Project? BuildProject(ProjectDto projectDto)
+    public static Project? BuildProject(ProjectRequestModel projectRequestModel)
     {
-        List<Task> tasks = projectDto.Tasks.Select(t => new Task(t.Id, t.Name, t.Complexity)).ToList();
-        List<Worker> workers = projectDto.Workers.Select(w => new Worker(w.Id, w.Name, w.Salary, w.DevelopmentVelocity)).ToList();
+        List<Task> tasks = projectRequestModel.Tasks
+            .Select(t => new Task(t.Id, t.Name, t.Complexity))
+            .ToList();
+        List<Worker> workers = projectRequestModel.Workers
+            .Select(w => new Worker(w.Id, w.Name, w.Salary, w.DevelopmentVelocity))
+            .ToList();
 
         // Fill up dependencies between tasks and workers.
-        foreach (TaskDto taskDto in projectDto.Tasks)
+        foreach (TaskRequestModel taskDto in projectRequestModel.Tasks)
         {
             Task task = tasks.Find(t => t.Id == taskDto.Id)!;
             foreach (int parentTaskId in taskDto.ParentTasks)
@@ -53,7 +59,7 @@ public class Project
         }
 
         CountPriorities(tasks);
-        return new Project(projectDto.Name, tasks, workers);
+        return new Project(projectRequestModel.Id, projectRequestModel.Name, tasks, workers);
     }
 
     private static void CountPriorities(IEnumerable<Task> tasks)
@@ -142,27 +148,11 @@ public class Project
         Console.WriteLine();
     }
 
-    public void PrintGanttDiagram()
+    public static PlannedProjectResponseModel ExportPlannedProject(Project project)
     {
-        if (EndingTime == default)
-        {
-            Console.WriteLine("Cannot print Gantt diagram because project was not planned yet.");
-            return;
-        }
-
-        Console.WriteLine($"Work | Graph");
-        foreach (var (task, i) in _tasks.OrderBy(w => w.Id).Select((task, i) => (task, i)))
-        {
-            string graphString = string.Join(" ", Enumerable.Repeat(task.Executor!.Name, (int)Math.Round(task.ExecutionDuration)));
-            Console.WriteLine($"{i + 1,4} | {graphString.PadLeft((int)Math.Round(task.ExecutionStart * 2 + graphString.Length))}");
-        }
-
-        string daysLegend = string.Empty;
-        for (var i = 1; i <= EndingTime; i++)
-        {
-            daysLegend += $"{i,2}";
-        }
-        Console.WriteLine($"{new string('-', 7 + daysLegend.Length)}");
-        Console.WriteLine($"{new string(' ', 4)} |{daysLegend}");
+        var tasksForExport = project.Tasks
+            .Select(t => new TaskResponseModel(t.Id, t.Name, t.ExecutionStart, t.ExecutionDuration, t.Executor!.Id));
+        var workersForExport = project.Workers.Select(w => new WorkerResponseModel(w.Id, w.Name));
+        return new PlannedProjectResponseModel(project.Id, project.Name, tasksForExport, workersForExport);
     }
 }

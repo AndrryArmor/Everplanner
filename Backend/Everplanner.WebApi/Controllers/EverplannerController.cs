@@ -11,16 +11,16 @@ public class EverplannerController : ControllerBase
     }
 
     [HttpPost("PlanProject")]
-    public IActionResult PlanProject(ProjectDto projectDto)
+    public IActionResult PlanProject(ProjectRequestModel projectRequestModel)
     {
-        Project? project = Project.BuildProject(projectDto);
+        Project? project = Project.BuildProject(projectRequestModel);
         if (project is null)
         {
             return Problem("Project build failed.");
         }
 
         project.PlanProject();
-
-        return Ok();
+        PlannedProjectResponseModel projectResult = Project.ExportPlannedProject(project);
+        return Ok(projectResult);
     }
 }
