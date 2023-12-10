@@ -27,7 +27,6 @@ const chartData = ref(null);
 const projectStats = ref(null);
 
 async function planProjectForMinimalTime(tasks, workers) {
-  //const project = getTemplateProject();
   const project = {
     id: 0,
     name: "Test project",
@@ -64,7 +63,6 @@ async function planProjectForMinimalTime(tasks, workers) {
 }
 
 async function planProjectForMinimalWorkersCount(tasks, workers) {
-  //const project = getTemplateProject();
   const project = {
     id: 0,
     name: "Test project",
@@ -98,111 +96,6 @@ async function planProjectForMinimalWorkersCount(tasks, workers) {
     chartData.value = chartDataResponse;
     mode.value = Modes.ShowChart;
   }
-}
-
-function getTemplateProject() {
-  return {
-    id: 0,
-    name: "Test project",
-    tasks: [
-      {
-        id: 1,
-        name: "Створити діаграму",
-        complexity: 5,
-        parentTasks: [],
-        availableWorkers: [1, 2, 3, 4],
-      },
-      {
-        id: 2,
-        name: "Створити діаграму",
-        complexity: 10,
-        parentTasks: [],
-        availableWorkers: [1, 2, 3, 4],
-      },
-      {
-        id: 3,
-        name: "Створити діаграму",
-        complexity: 2,
-        parentTasks: [],
-        availableWorkers: [1, 2, 3, 4],
-      },
-      {
-        id: 4,
-        name: "Створити діаграму",
-        complexity: 6,
-        parentTasks: [],
-        availableWorkers: [1, 2, 3, 4],
-      },
-      {
-        id: 5,
-        name: "Створити діаграму",
-        complexity: 8,
-        parentTasks: [1],
-        availableWorkers: [1, 2, 3, 4],
-      },
-      {
-        id: 6,
-        name: "Створити діаграму",
-        complexity: 7,
-        parentTasks: [1, 2, 3],
-        availableWorkers: [1, 2, 3, 4],
-      },
-      {
-        id: 7,
-        name: "Створити діаграму",
-        complexity: 1,
-        parentTasks: [3, 4],
-        availableWorkers: [1, 2, 3, 4],
-      },
-      {
-        id: 8,
-        name: "Створити діаграму",
-        complexity: 4,
-        parentTasks: [5],
-        availableWorkers: [1, 2, 3, 4],
-      },
-      {
-        id: 9,
-        name: "Створити діаграму",
-        complexity: 2,
-        parentTasks: [6, 7],
-        availableWorkers: [1, 2, 3, 4],
-      },
-      {
-        id: 10,
-        name: "Створити діаграму",
-        complexity: 5,
-        parentTasks: [8, 9],
-        availableWorkers: [1, 2, 3, 4],
-      },
-    ],
-    workers: [
-      {
-        id: 1,
-        name: "Співробітник 1",
-        salary: 150,
-        developmentVelocity: 15,
-      },
-      {
-        id: 2,
-        name: "Співробітник 2",
-        salary: 100,
-        developmentVelocity: 10,
-      },
-      {
-        id: 3,
-        name: "Співробітник 3",
-        salary: 30,
-        developmentVelocity: 3,
-      },
-      {
-        id: 4,
-        name: "Співробітник 4",
-        salary: 20,
-        developmentVelocity: 2,
-      },
-    ],
-  };
 }
 
 function generateChartDataFromPlannedProject(project) {

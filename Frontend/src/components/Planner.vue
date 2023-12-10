@@ -107,16 +107,28 @@ const developmentVelocityMetric = `${storyPointsSign}/тиж.`;
 const workersTableHeaders = ["", "ID", "ПІБ", "Зарплата", "Швидкість розробки"];
 const workers = ref([
   {
-    id: 0,
-    name: "Ачілов А. В.",
-    salary: 1000,
+    id: 1,
+    name: "Співробітник 1",
+    salary: 150,
     developmentVelocity: 15,
   },
   {
-    id: 1,
-    name: "Хвостенко О. Д.",
-    salary: 800,
+    id: 2,
+    name: "Співробітник 2",
+    salary: 100,
     developmentVelocity: 10,
+  },
+  {
+    id: 3,
+    name: "Співробітник 3",
+    salary: 30,
+    developmentVelocity: 3,
+  },
+  {
+    id: 4,
+    name: "Співробітник 4",
+    salary: 20,
+    developmentVelocity: 2,
   },
 ]);
 
@@ -147,18 +159,74 @@ const tasksTableHeaders = [
 ];
 const tasks = ref([
   {
-    id: 0,
-    name: "Створити діаграму",
-    complexity: 8,
+    id: 1,
+    name: "Задача 1",
+    complexity: 5,
     parentTasks: [],
-    availableWorkers: [0, 1],
+    availableWorkers: [1, 2, 3, 4],
   },
   {
-    id: 1,
-    name: "Додати додавання спіробітників та задач",
-    complexity: 15,
-    parentTasks: [0],
-    availableWorkers: [1],
+    id: 2,
+    name: "Задача 2",
+    complexity: 10,
+    parentTasks: [],
+    availableWorkers: [1, 2, 3, 4],
+  },
+  {
+    id: 3,
+    name: "Задача 3",
+    complexity: 2,
+    parentTasks: [],
+    availableWorkers: [1, 2, 3, 4],
+  },
+  {
+    id: 4,
+    name: "Задача 4",
+    complexity: 6,
+    parentTasks: [],
+    availableWorkers: [1, 2, 3, 4],
+  },
+  {
+    id: 5,
+    name: "Задача 5",
+    complexity: 8,
+    parentTasks: [1],
+    availableWorkers: [1, 2, 3, 4],
+  },
+  {
+    id: 6,
+    name: "Задача 6",
+    complexity: 7,
+    parentTasks: [1, 2, 3],
+    availableWorkers: [1, 2, 3, 4],
+  },
+  {
+    id: 7,
+    name: "Задача 7",
+    complexity: 1,
+    parentTasks: [3, 4],
+    availableWorkers: [1, 2, 3, 4],
+  },
+  {
+    id: 8,
+    name: "Задача 8",
+    complexity: 4,
+    parentTasks: [5],
+    availableWorkers: [1, 2, 3, 4],
+  },
+  {
+    id: 9,
+    name: "Задача 9",
+    complexity: 2,
+    parentTasks: [6, 7],
+    availableWorkers: [1, 2, 3, 4],
+  },
+  {
+    id: 10,
+    name: "Задача 10",
+    complexity: 5,
+    parentTasks: [8, 9],
+    availableWorkers: [1, 2, 3, 4],
   },
 ]);
 

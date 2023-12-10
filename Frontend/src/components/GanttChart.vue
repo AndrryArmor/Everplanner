@@ -109,8 +109,8 @@ const chartOptions = {
   },
 };
 const style = {
-  width: `max(100vw, ${500 + 31 * props.projectStats.endingTime}px)`,
-  "max-width": `max(100vw - 2em, ${500 + 31 * props.projectStats.endingTime}px)`,
+  width: `max(100vw - 2em - 20px, ${500 + 31 * props.projectStats.endingTime}px)`,
+  "max-width": `max(100vw - 2em - 20px, ${500 + 31 * props.projectStats.endingTime}px)`,
   height: `max(100px + 25vh, ${100 + 40 * props.projectStats.tasks}px)`,
   "max-height": `max(100px + 25vh, ${100 + 40 * props.projectStats.tasks}px)`,
 };
