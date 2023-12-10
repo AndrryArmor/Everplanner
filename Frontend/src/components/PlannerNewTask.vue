@@ -155,6 +155,10 @@ const hasAnyAvailableWorkersForTaskToAdd = computed(() => {
 });
 
 function addNewTask() {
+  if (newTask.value.availableWorkers.length === 0) {
+    alert("Не можна додати задачу без доступних співробітників для неї.");
+    return;
+  }
   emit("addNewTask", newTask.value);
   newTask = resetNewTask();
 }

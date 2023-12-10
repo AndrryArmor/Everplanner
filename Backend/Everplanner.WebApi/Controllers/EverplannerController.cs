@@ -16,10 +16,18 @@ public class EverplannerController : ControllerBase
         Project? project = Project.BuildProject(projectRequestModel);
         if (project is null)
         {
-            return Problem("Створення проєкту не відбулося через помилку в даних.");
+            return Problem("Створення проєкту не відбулося через наявність неіснуючої задачі серед батьків однієї з задач" +
+                "або через наявність неіснуючого доступного співробітника для однієї з задач.");
         }
 
-        project.PlanProject();
+        try
+        {
+            project.PlanProject2();
+        }
+        catch (InvalidOperationException)
+        {
+            return Problem("Планування проєкту було перервано через відсутність доступних співробітників для однієї з задач.");
+        }
         PlannedProjectResponseModel projectResult = Project.ExportPlannedProject(project);
         return Ok(projectResult);
     }

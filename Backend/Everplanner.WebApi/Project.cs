@@ -139,6 +139,44 @@ public class Project
         UsedWorkersCount = CountUsedWorkers();
     }
 
+    public void PlanProject2()
+    {
+        IEnumerable<Task> tasksByPriority = GetTasksByPriority();
+        foreach ((Task task, int i) in tasksByPriority.Select((task, i) => (task, i)))
+        {
+            Console.WriteLine($"Iteration {i + 1}, task {task.Name}: complexity {task.Complexity}");
+            Console.WriteLine($"[{string.Join(", ", _workers.Select(w => w.Availability))}]");
+            Console.WriteLine(new string('-', 20));
+
+            double minTaskEndingTime = double.MaxValue;
+            Worker minWorker = task.AvailableWorkers.First();
+            foreach (Worker worker in task.AvailableWorkers)
+            {
+                var taskEndingTime = Math.Max(worker.Availability, task.Availability) + task.Complexity * 5.0 / worker.DevelopmentVelocity;
+                Console.WriteLine($"Worker {worker.Name}: {taskEndingTime}");
+                if (taskEndingTime < minTaskEndingTime
+                    || taskEndingTime == minTaskEndingTime && worker.Salary < minWorker.Salary)
+                {
+                    minWorker = worker;
+                    minTaskEndingTime = taskEndingTime;
+                }
+            }
+
+            task.Executor = minWorker;
+            task.ExecutionStart = Math.Max(minWorker.Availability, task.Availability);
+            task.ExecutionDuration = task.Complexity * 5.0 / minWorker.DevelopmentVelocity;
+            minWorker.Availability = minTaskEndingTime;
+            task.Availability = minTaskEndingTime;
+            task.ChildTasks.ForEach(t => t.Availability = Math.Max(t.Availability, minTaskEndingTime));
+
+            Console.WriteLine($"Chosen worker: {minWorker.Name}, will finish at {minTaskEndingTime}");
+            Console.WriteLine();
+        }
+
+        EndingTime = tasksByPriority.Max(task => task.ExecutionStart + task.ExecutionDuration);
+        UsedWorkersCount = CountUsedWorkers();
+    }
+
     private int CountUsedWorkers()
     {
         var uniqueWorkers = new HashSet<Worker>();
