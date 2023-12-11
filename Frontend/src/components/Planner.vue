@@ -96,11 +96,19 @@ import PlannerNewWorker from "./PlannerNewWorker.vue";
 import PlannerTask from "./PlannerTask.vue";
 import PlannerNewTask from "./PlannerNewTask.vue";
 
-const emit = defineEmits(["planProjectForMinimalTime", "planProjectForMinimalWorkersCount"]);
+const emit = defineEmits([
+  "back-to-projects",
+  "plan-project-for-minimal-time",
+  "plan-project-for-minimal-workers-count",
+]);
 
 const dollarSign = "$";
 const storyPointsSign = "SP";
 const developmentVelocityMetric = `${storyPointsSign}/тиж.`;
+
+function backToProjects() {
+  emit("back-to-projects");
+}
 
 const workersTableHeaders = ["", "ID", "ПІБ", "Зарплата", "Швидкість розробки"];
 const workers = ref([
@@ -284,11 +292,11 @@ function deleteAvailableWorker(taskId, workerId) {
 }
 
 function planProjectForMinimalTime() {
-  emit("planProjectForMinimalTime", tasks.value, workers.value);
+  emit("plan-project-for-minimal-time", tasks.value, workers.value);
 }
 
 function planProjectForMinimalWorkersCount() {
-  emit("planProjectForMinimalWorkersCount", tasks.value, workers.value);
+  emit("plan-project-for-minimal-workers-count", tasks.value, workers.value);
 }
 </script>
 

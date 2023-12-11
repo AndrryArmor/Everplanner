@@ -104,11 +104,11 @@ const props = defineProps({
   },
 });
 const emit = defineEmits([
-  "deleteTask",
-  "addParentTask",
-  "deleteParentTask",
-  "addAvailableWorker",
-  "deleteAvailableWorker",
+  "delete-task",
+  "add-parent-task",
+  "delete-parent-task",
+  "add-available-worker",
+  "delete-available-worker",
 ]);
 
 const dropdownAddParentTask = ref(null);
@@ -132,25 +132,25 @@ const hasAnyAvailableWorkersForTaskToAdd = computed(() => {
 });
 
 function deleteTask() {
-  emit("deleteTask", props.task.id);
+  emit("delete-task", props.task.id);
 }
 
 function addParentTask(parentTaskId) {
-  emit("addParentTask", props.task.id, parentTaskId);
+  emit("add-parent-task", props.task.id, parentTaskId);
   dropdownAddParentTask.value.classList.remove("show");
 }
 
 function deleteParentTask(parentTaskId) {
-  emit("deleteParentTask", props.task.id, parentTaskId);
+  emit("delete-parent-task", props.task.id, parentTaskId);
 }
 
 function addAvailableWorker(workerId) {
-  emit("addAvailableWorker", props.task.id, workerId);
+  emit("add-available-worker", props.task.id, workerId);
   dropdownAddAvailableWorker.value.classList.remove("show");
 }
 
 function deleteAvailableWorker(workerId) {
-  emit("deleteAvailableWorker", props.task.id, workerId);
+  emit("delete-available-worker", props.task.id, workerId);
 }
 </script>
 

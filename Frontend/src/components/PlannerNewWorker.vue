@@ -59,7 +59,7 @@ const props = defineProps({
     required: true,
   },
 });
-const emit = defineEmits(["addNewWorker"]);
+const emit = defineEmits(["add-new-worker"]);
 
 var newWorker = resetNewWorker();
 function resetNewWorker() {
@@ -73,7 +73,7 @@ function resetNewWorker() {
 watchEffect(() => (newWorker.value.id = props.newWorkerId));
 
 function addNewWorker() {
-  emit("addNewWorker", newWorker.value);
+  emit("add-new-worker", newWorker.value);
   newWorker = resetNewWorker();
 }
 </script>

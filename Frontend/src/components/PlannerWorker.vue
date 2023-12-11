@@ -27,10 +27,10 @@ const props = defineProps({
     required: true,
   },
 });
-const emit = defineEmits(["deleteWorker"]);
+const emit = defineEmits(["delete-worker"]);
 
 function deleteWorker() {
-  emit("deleteWorker", props.worker.id);
+  emit("delete-worker", props.worker.id);
 }
 </script>
 

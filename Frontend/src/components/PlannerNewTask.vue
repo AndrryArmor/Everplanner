@@ -121,7 +121,7 @@ const props = defineProps({
     required: true,
   },
 });
-const emit = defineEmits(["addNewTask"]);
+const emit = defineEmits(["add-new-task"]);
 
 const dropdownAddParentTask = ref(null);
 const dropdownAddAvailableWorker = ref(null);
@@ -159,7 +159,7 @@ function addNewTask() {
     alert("Не можна додати задачу без доступних співробітників для неї.");
     return;
   }
-  emit("addNewTask", newTask.value);
+  emit("add-new-task", newTask.value);
   newTask = resetNewTask();
 }
 
