@@ -3,10 +3,10 @@
     <h4 class="ms-5">Співробітники</h4>
     <div class="row overflow-x-auto">
       <div class="col-auto">
-        <table class="table m-0">
+        <table class="table align-middle m-0">
           <thead>
             <tr>
-              <th v-for="header in workersTableHeaders">
+              <th v-for="header in workersTableHeaders" class="text-center align-middle">
                 {{ header }}
               </th>
             </tr>
@@ -35,10 +35,10 @@
     <h4 class="ms-5">Задачі</h4>
     <div class="row overflow-x-auto">
       <div class="col-auto">
-        <table class="table m-0">
+        <table class="table align-middle m-0">
           <thead>
             <tr>
-              <th v-for="header in tasksTableHeaders">
+              <th v-for="header in tasksTableHeaders" class="text-center align-middle">
                 {{ header }}
               </th>
             </tr>
@@ -72,14 +72,18 @@
   <div class="container-fluid my-3 actions">
     <div class="row gy-3">
       <div class="col-lg-auto">
-        <button type="button" class="btn btn-lg btn-primary" @click="planProjectForMinimalTime">
+        <button
+          type="button"
+          class="btn btn-lg btn-primary w-100"
+          @click="planProjectForMinimalTime"
+        >
           Cпланувати проєкт за мінімальний час
         </button>
       </div>
       <div class="col-lg-auto">
         <button
           type="button"
-          class="btn btn-lg btn-primary"
+          class="btn btn-lg btn-primary w-100"
           @click="planProjectForMinimalWorkersCount"
         >
           Cпланувати проєкт за мінімальну кількість співробітників
@@ -91,10 +95,10 @@
 
 <script setup>
 import { ref, computed, watchEffect } from "vue";
-import PlannerWorker from "./PlannerWorker.vue";
-import PlannerNewWorker from "./PlannerNewWorker.vue";
-import PlannerTask from "./PlannerTask.vue";
-import PlannerNewTask from "./PlannerNewTask.vue";
+import PlannerWorker from "@/components/PlannerWorker.vue";
+import PlannerNewWorker from "@/components/PlannerNewWorker.vue";
+import PlannerTask from "@/components/PlannerTask.vue";
+import PlannerNewTask from "@/components/PlannerNewTask.vue";
 
 const emit = defineEmits([
   "back-to-projects",
@@ -301,47 +305,8 @@ function planProjectForMinimalWorkersCount() {
 </script>
 
 <style scoped lang="scss">
-.table {
-  vertical-align: middle;
+@import "@/assets/_variables.scss";
 
-  th {
-    text-align: center;
-  }
-
-  :deep(td) {
-    padding-top: 0.25em;
-    padding-bottom: 0.25em;
-
-    button.action {
-      border-width: 0px;
-      margin: -0.25em -0.25em -0.25em -0.25em;
-    }
-  }
-
-  :deep(.btn-close) {
-    font-size: 0.75em;
-  }
-
-  :deep(.inline-item) {
-    padding: 0.25rem 0.5rem;
-    border: 1px solid;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-  }
-
-  :deep(.dropdown) {
-    position: static;
-
-    .dropdown-menu {
-      height: auto;
-      max-height: 200px;
-      overflow-x: hidden;
-    }
-  }
-}
-
-$td-trashbin-width: 30px;
-$td-id-width: 50px;
 $td-badges-width: 500px;
 $td-worker-name-width: 300px;
 $td-salary-width: 150px;
@@ -352,9 +317,9 @@ $td-complexity-width: 125px;
 .workers .table {
   th:nth-child(1),
   :deep(td:nth-child(1)) {
-    width: $td-trashbin-width;
-    min-width: $td-trashbin-width;
-    max-width: $td-trashbin-width;
+    width: $td-action-width;
+    min-width: $td-action-width;
+    max-width: $td-action-width;
     text-align: center;
   }
 
@@ -393,9 +358,9 @@ $td-complexity-width: 125px;
 .tasks .table {
   th:nth-child(1),
   :deep(td:nth-child(1)) {
-    width: $td-trashbin-width;
-    min-width: $td-trashbin-width;
-    max-width: $td-trashbin-width;
+    width: $td-action-width;
+    min-width: $td-action-width;
+    max-width: $td-action-width;
     text-align: center;
   }
 
@@ -435,9 +400,5 @@ $td-complexity-width: 125px;
     min-width: $td-badges-width;
     max-width: $td-badges-width;
   }
-}
-
-.actions button {
-  width: 100%;
 }
 </style>
