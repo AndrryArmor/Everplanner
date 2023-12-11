@@ -1,94 +1,92 @@
 <template>
-  <form>
-    <div class="container-fluid mt-3 workers">
-      <h4 class="ms-5">Співробітники</h4>
-      <div class="row overflow-x-auto">
-        <div class="col-auto">
-          <table class="table m-0">
-            <thead>
-              <tr>
-                <th v-for="header in workersTableHeaders">
-                  {{ header }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <PlannerWorker
-                v-for="worker in workers"
-                :key="worker.id"
-                :worker="worker"
-                :dollar-sign="dollarSign"
-                :development-velocity-metric="developmentVelocityMetric"
-                @delete-worker="deleteWorker"
-              />
-              <PlannerNewWorker
-                :new-worker-id="newWorkerId"
-                :dollar-sign="dollarSign"
-                :development-velocity-metric="developmentVelocityMetric"
-                @add-new-worker="addNewWorker"
-              />
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div class="container-fluid mt-3 tasks">
-      <h4 class="ms-5">Задачі</h4>
-      <div class="row overflow-x-auto">
-        <div class="col-auto">
-          <table class="table m-0">
-            <thead>
-              <tr>
-                <th v-for="header in tasksTableHeaders">
-                  {{ header }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <PlannerTask
-                v-for="task in tasks"
-                :key="task.id"
-                :task="task"
-                :tasks="tasks"
-                :workers="workers"
-                :story-points-sign="storyPointsSign"
-                @delete-task="deleteTask"
-                @add-parent-task="addParentTask"
-                @delete-parent-task="deleteParentTask"
-                @add-available-worker="addAvailableWorker"
-                @delete-available-worker="deleteAvailableWorker"
-              />
-              <PlannerNewTask
-                :new-task-id="newTaskId"
-                :tasks="tasks"
-                :workers="workers"
-                :story-points-sign="storyPointsSign"
-                @add-new-task="addNewTask"
-              />
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div class="container-fluid my-3 actions">
-      <div class="row gy-3">
-        <div class="col-lg-auto">
-          <button type="button" class="btn btn-lg btn-primary" @click="planProjectForMinimalTime">
-            Cпланувати проєкт за мінімальний час
-          </button>
-        </div>
-        <div class="col-lg-auto">
-          <button
-            type="button"
-            class="btn btn-lg btn-primary"
-            @click="planProjectForMinimalWorkersCount"
-          >
-            Cпланувати проєкт за мінімальну кількість співробітників
-          </button>
-        </div>
+  <form class="container-fluid mt-3 workers">
+    <h4 class="ms-5">Співробітники</h4>
+    <div class="row overflow-x-auto">
+      <div class="col-auto">
+        <table class="table m-0">
+          <thead>
+            <tr>
+              <th v-for="header in workersTableHeaders">
+                {{ header }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <PlannerWorker
+              v-for="worker in workers"
+              :key="worker.id"
+              :worker="worker"
+              :dollar-sign="dollarSign"
+              :development-velocity-metric="developmentVelocityMetric"
+              @delete-worker="deleteWorker"
+            />
+            <PlannerNewWorker
+              :new-worker-id="newWorkerId"
+              :dollar-sign="dollarSign"
+              :development-velocity-metric="developmentVelocityMetric"
+              @add-new-worker="addNewWorker"
+            />
+          </tbody>
+        </table>
       </div>
     </div>
   </form>
+  <form class="container-fluid mt-3 tasks">
+    <h4 class="ms-5">Задачі</h4>
+    <div class="row overflow-x-auto">
+      <div class="col-auto">
+        <table class="table m-0">
+          <thead>
+            <tr>
+              <th v-for="header in tasksTableHeaders">
+                {{ header }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <PlannerTask
+              v-for="task in tasks"
+              :key="task.id"
+              :task="task"
+              :tasks="tasks"
+              :workers="workers"
+              :story-points-sign="storyPointsSign"
+              @delete-task="deleteTask"
+              @add-parent-task="addParentTask"
+              @delete-parent-task="deleteParentTask"
+              @add-available-worker="addAvailableWorker"
+              @delete-available-worker="deleteAvailableWorker"
+            />
+            <PlannerNewTask
+              :new-task-id="newTaskId"
+              :tasks="tasks"
+              :workers="workers"
+              :story-points-sign="storyPointsSign"
+              @add-new-task="addNewTask"
+            />
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </form>
+  <div class="container-fluid my-3 actions">
+    <div class="row gy-3">
+      <div class="col-lg-auto">
+        <button type="button" class="btn btn-lg btn-primary" @click="planProjectForMinimalTime">
+          Cпланувати проєкт за мінімальний час
+        </button>
+      </div>
+      <div class="col-lg-auto">
+        <button
+          type="button"
+          class="btn btn-lg btn-primary"
+          @click="planProjectForMinimalWorkersCount"
+        >
+          Cпланувати проєкт за мінімальну кількість співробітників
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -134,7 +132,7 @@ const workers = ref([
 
 const newWorkerId = computed(() => {
   if (workers.value.length === 0) {
-    return 0;
+    return 1;
   }
 
   const sortedWorkers = [...workers.value].sort((worker1, worker2) => worker1.id - worker2.id);
@@ -232,7 +230,7 @@ const tasks = ref([
 
 const newTaskId = computed(() => {
   if (tasks.value.length === 0) {
-    return 0;
+    return 1;
   }
 
   var sortedTasks = [...tasks.value].sort((task1, task2) => task1.id - task2.id);
