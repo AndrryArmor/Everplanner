@@ -1,17 +1,22 @@
 <template>
   <div class="m-3">
     <h4 class="ms-5">
-      Результати планування проєкту "{{ projectStats.name }}" за мінімальний час:
+      Результати планування проєкту "{{ projectStats.name }}" за {{ projectStats.titleTrait }}:
     </h4>
-    <p>
-      Час виконання проєкту: <b>{{ projectStats.endingTime }} днів</b><br />
-      Необхідна кількість працівників:
-      <b>{{ projectStats.usedWorkers }}/{{ projectStats.workers }}</b>
-    </p>
-    Діаграма Ганта:
-    <div class="overflow-x-auto">
-      <BarChart :chart-data="chartData" :options="chartOptions" :style="style" />
-    </div>
+    <template v-if="projectStats.endingTime > 0">
+      <p>
+        Час виконання проєкту: <b>{{ projectStats.endingTime.toFixed(2) }} днів.</b><br />
+        Необхідна кількість працівників:
+        <b>{{ projectStats.usedWorkers }}/{{ projectStats.workers }}</b>
+      </p>
+      <b>Діаграма Ганта:</b>
+      <div class="overflow-x-auto">
+        <BarChart :chart-data="chartData" :options="chartOptions" :style="style" />
+      </div>
+    </template>
+    <template v-else>
+      <p>Проєкт неможливо виконати за {{ projectStats.expectedProjectDuration }} дні(в).</p>
+    </template>
     <button type="button" class="btn btn-lg btn-primary m-2" @click="backToPlanning">
       Назад до планування проєкту
     </button>

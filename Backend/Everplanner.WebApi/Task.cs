@@ -1,6 +1,4 @@
-﻿using Everplanner.WebApi.Dto;
-
-namespace Everplanner.WebApi;
+﻿namespace Everplanner.WebApi;
 
 public class Task
 {

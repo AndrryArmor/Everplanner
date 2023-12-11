@@ -35,13 +35,16 @@ async function planProjectForMinimalTime(tasks, workers) {
   };
   var chartDataResponse;
   try {
-    chartDataResponse = await fetch("https://localhost:7229/Everplanner/PlanProject", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(project),
-    })
+    chartDataResponse = await fetch(
+      "https://localhost:7229/Everplanner/PlanProjectForMinimalTime",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(project),
+      }
+    )
       .then(async (response) => {
         if (!response.ok) {
           const text = await response.text();
@@ -50,10 +53,10 @@ async function planProjectForMinimalTime(tasks, workers) {
         return response.json();
       })
       .then((projectData) => {
-        return generateChartDataFromPlannedProject(projectData);
+        return generateChartDataFromPlannedProject(projectData, "мінімальний час");
       });
   } catch (error) {
-    alert(`Проєкт не вдалося спланувати через наступну помилку: ${error.message}`);
+    alert(error.message);
   }
 
   if (chartDataResponse) {
@@ -63,21 +66,26 @@ async function planProjectForMinimalTime(tasks, workers) {
 }
 
 async function planProjectForMinimalWorkersCount(tasks, workers) {
+  const expectedProjectDuration = 11;
   const project = {
     id: 0,
     name: "Test project",
     tasks: tasks,
     workers: workers,
+    expectedProjectDuration: expectedProjectDuration,
   };
   var chartDataResponse;
   try {
-    chartDataResponse = await fetch("https://localhost:7229/Everplanner/PlanProject", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(project),
-    })
+    chartDataResponse = await fetch(
+      "https://localhost:7229/Everplanner/PlanProjectForMinimalWorkersCount",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(project),
+      }
+    )
       .then(async (response) => {
         if (!response.ok) {
           const text = await response.text();
@@ -86,10 +94,14 @@ async function planProjectForMinimalWorkersCount(tasks, workers) {
         return response.json();
       })
       .then((projectData) => {
-        return generateChartDataFromPlannedProject(projectData);
+        return generateChartDataFromPlannedProject(
+          projectData,
+          "мінімальну кількість співробітників",
+          expectedProjectDuration
+        );
       });
   } catch (error) {
-    alert(`Проєкт не вдалося спланувати через наступну помилку: ${error.message}`);
+    alert(error.message);
   }
 
   if (chartDataResponse) {
@@ -98,14 +110,18 @@ async function planProjectForMinimalWorkersCount(tasks, workers) {
   }
 }
 
-function generateChartDataFromPlannedProject(project) {
+function generateChartDataFromPlannedProject(project, titleTrait, expectedProjectDuration) {
   projectStats.value = {
     name: project.name,
+    titleTrait: titleTrait,
     endingTime: project.endingTime,
     tasks: project.tasks.length,
     workers: project.workers.length,
     usedWorkers: project.usedWorkersCount,
   };
+  if (expectedProjectDuration) {
+    projectStats.value.expectedProjectDuration = expectedProjectDuration;
+  }
 
   const labels = new Array(project.tasks.length);
   const shift = new Array(project.tasks.length);

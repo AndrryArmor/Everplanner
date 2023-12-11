@@ -3,32 +3,42 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Everplanner.WebApi.Controllers;
 [ApiController]
-[Route("[controller]")]
+[Route("Everplanner")]
 public class EverplannerController : ControllerBase
 {
     public EverplannerController()
     {
     }
 
-    [HttpPost("PlanProject")]
-    public IActionResult PlanProject(ProjectRequestModel projectRequestModel)
+    [HttpPost("PlanProjectForMinimalTime")]
+    public IActionResult PlanProjectForMinimalTime(ProjectRequestModel projectRequestModel)
     {
-        Project? project = Project.BuildProject(projectRequestModel);
-        if (project is null)
-        {
-            return Problem("Створення проєкту не відбулося через наявність неіснуючої задачі серед батьків однієї з задач" +
-                "або через наявність неіснуючого доступного співробітника для однієї з задач.");
-        }
-
         try
         {
-            project.PlanProject2();
+            Project project = Project.BuildProject(projectRequestModel);
+            project.PlanProjectForMinimalTime();
+            PlannedProjectResponseModel projectResult = Project.ExportPlannedProject(project);
+            return Ok(projectResult);
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException ex)
         {
-            return Problem("Планування проєкту було перервано через відсутність доступних співробітників для однієї з задач.");
+            return Problem($"Планування проєкту не було виконано через наступну помилку: {ex.Message}");
         }
-        PlannedProjectResponseModel projectResult = Project.ExportPlannedProject(project);
-        return Ok(projectResult);
+    }
+
+    [HttpPost("PlanProjectForMinimalWorkersCount")]
+    public IActionResult PlanProjectForMinimalWorkersCount(ProjectRequestModel projectRequestModel)
+    {
+        try
+        {
+            Project project = Project.BuildProject(projectRequestModel);
+            project.PlanProjectForMinimalWorkersCount();
+            PlannedProjectResponseModel projectResult = Project.ExportPlannedProject(project);
+            return Ok(projectResult);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Problem($"Планування проєкту не було виконано через наступну помилку: {ex.Message}");
+        }
     }
 }

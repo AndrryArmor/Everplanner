@@ -83,7 +83,7 @@
             class="btn btn-lg btn-primary"
             @click="planProjectForMinimalWorkersCount"
           >
-            Cпланувати проєкт за мінімальну кількість працівників
+            Cпланувати проєкт за мінімальну кількість співробітників
           </button>
         </div>
       </div>
