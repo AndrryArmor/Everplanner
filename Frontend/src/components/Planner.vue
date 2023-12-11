@@ -1,4 +1,15 @@
 <template>
+  <div class="container-fluid my-3 actions">
+    <div class="row">
+      <div class="col-lg-auto">
+        <button type="button" class="btn btn-secondary w-100" @click="backToProjects">
+          <i class="bi bi-arrow-left"></i>
+          Назад до списку проєктів
+        </button>
+      </div>
+    </div>
+  </div>
+  <h1 class="ms-5">Проєкт 1</h1>
   <form class="container-fluid mt-3 workers">
     <h4 class="ms-5">Співробітники</h4>
     <div class="row overflow-x-auto">

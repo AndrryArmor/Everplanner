@@ -1,6 +1,8 @@
 <template>
+  <Projects v-if="mode === Modes.ShowProjects" @show-project="showProject" />
   <Planner
-    v-if="mode === Modes.ShowPlanner"
+    v-else-if="mode === Modes.ShowPlanner"
+    @back-to-projects="backToProjects"
     @plan-project-for-minimal-time="planProjectForMinimalTime"
     @plan-project-for-minimal-workers-count="planProjectForMinimalWorkersCount"
   />
@@ -14,10 +16,12 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import Projects from "@/components/Projects.vue";
 import Planner from "@/components/Planner.vue";
 import GanttChart from "@/components/GanttChart.vue";
 
 const Modes = {
+  ShowProjects: "ShowProjects",
   ShowPlanner: "ShowPlanner",
   ShowChart: "ShowChart",
 };
@@ -25,6 +29,14 @@ const Modes = {
 const mode = ref(Modes.ShowPlanner);
 const chartData = ref(null);
 const projectStats = ref(null);
+
+function showProject(project) {
+  mode.value = Modes.ShowPlanner;
+}
+
+function backToProjects() {
+  mode.value = Modes.ShowProjects;
+}
 
 async function planProjectForMinimalTime(tasks, workers) {
   const project = {
