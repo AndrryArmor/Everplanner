@@ -126,7 +126,7 @@ public class Project
 
             // Saving only tasks and not workers because we want to send data about ALL workers
             // and not only about chosen ones for tasks.
-            _tasks = tasks;
+            _tasks = tasks.OrderBy(t => t.Id).ToList();
             EndingTime = endingTime;
             UsedWorkersCount = CountUsedWorkers(tasks);
             tasks = CloneTasks(tasks);

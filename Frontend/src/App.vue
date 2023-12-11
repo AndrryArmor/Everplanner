@@ -66,7 +66,10 @@ async function planProjectForMinimalTime(tasks, workers) {
 }
 
 async function planProjectForMinimalWorkersCount(tasks, workers) {
-  const expectedProjectDuration = 11;
+  const expectedProjectDuration = Number.parseInt(
+    prompt("Введіть очікувану тривалість проєкту:"),
+    10
+  );
   const project = {
     id: 0,
     name: "Test project",
