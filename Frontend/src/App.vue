@@ -1,4 +1,6 @@
 <template>
+  <router-view></router-view>
+  <TheLogin />
   <Projects v-if="mode === Modes.ShowProjects" @show-project="showProject" />
   <Planner
     v-else-if="mode === Modes.ShowPlanner"
@@ -16,17 +18,19 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import TheLogin from "@/components/TheLogin.vue";
 import Projects from "@/components/Projects.vue";
 import Planner from "@/components/Planner.vue";
 import GanttChart from "@/components/GanttChart.vue";
 
 const Modes = {
+  ShowLogin: "ShowLogin",
   ShowProjects: "ShowProjects",
   ShowPlanner: "ShowPlanner",
   ShowChart: "ShowChart",
 };
 
-const mode = ref(Modes.ShowPlanner);
+const mode = ref(Modes.ShowLogin);
 const chartData = ref(null);
 const projectStats = ref(null);
 
