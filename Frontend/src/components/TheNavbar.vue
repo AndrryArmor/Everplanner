@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar shadow bg-gradient bg-light">
     <div class="container-fluid">
-      <router-link to="/" class="navbar-brand text-success fw-light">
+      <router-link to="/login" class="navbar-brand text-success fw-light">
         Everplanner
       </router-link>
       <ul class="navbar-nav me-auto">
@@ -11,7 +11,7 @@
       </ul>
       <ul class="navbar-nav">
         <li class="nav-item">
-          <router-link to="/" class="btn btn-outline-danger" role="button">
+          <router-link to="/login" class="btn btn-outline-danger" role="button">
             Вийти
             <i class="bi bi-box-arrow-right"></i>
           </router-link>

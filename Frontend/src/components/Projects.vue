@@ -19,12 +19,7 @@
               @open-project="openProject"
               @delete-project="deleteProject"
             />
-            <PlannerNewWorker
-              :new-worker-id="newProjectId"
-              :dollar-sign="dollarSign"
-              :development-velocity-metric="developmentVelocityMetric"
-              @add-new-worker="addNewProject"
-            />
+            <NewProject :new-project-id="newProjectId" @add-new-worker="addNewProject" />
           </tbody>
         </table>
       </div>

@@ -11,14 +11,19 @@
             </div>
           </div>
           <div class="row mb-4 mx-1">
-            <label for="inputPassword" class="col-12 col-form-label fs-5">Password</label>
+            <label for="inputPassword" class="col-12 col-form-label fs-5">Пароль</label>
             <div class="col-12">
               <input type="password" class="form-control form-control-lg" id="inputPassword" />
             </div>
           </div>
-          <div class="row mb-4 mx-1">
+          <div class="row mb-3 mx-1">
             <div class="col">
               <button type="submit" class="btn btn-lg btn-success w-100">Ввійти</button>
+            </div>
+          </div>
+          <div class="row mb-4 mx-1">
+            <div class="col text-center">
+              <span>Ви тут вперше? Тоді <router-link to="/signup" href="#">зареєструйтесь</router-link></span>
             </div>
           </div>
         </form>
@@ -32,8 +37,5 @@
 <style scoped lang="scss">
 .login-wrapper {
   width: 550px;
-  .login {
-    height: 400px;
-  }
 }
 </style>
