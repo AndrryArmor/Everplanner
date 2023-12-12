@@ -1,7 +1,7 @@
 <template>
-  <nav class="navbar shadow bg-gradient" style="background-color: #fcca7a">
+  <nav class="navbar shadow bg-gradient bg-light">
     <div class="container-fluid">
-      <router-link to="/" class="navbar-brand display-6 text-success fw-semibold">
+      <router-link to="/" class="navbar-brand text-success fw-light">
         Everplanner
       </router-link>
       <ul class="navbar-nav me-auto">

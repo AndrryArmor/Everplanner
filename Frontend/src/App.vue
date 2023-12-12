@@ -1,7 +1,6 @@
 <template>
   <TheNavbar />
   <router-view></router-view>
-  <TheLogin />
   <Projects v-if="mode === Modes.ShowProjects" @show-project="showProject" />
   <Planner
     v-else-if="mode === Modes.ShowPlanner"
