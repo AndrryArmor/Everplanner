@@ -19,7 +19,6 @@
 <script setup>
 import { ref, computed } from "vue";
 import TheNavbar from "@/components/TheNavbar.vue";
-import TheLogin from "@/components/TheLogin.vue";
 import Projects from "@/components/Projects.vue";
 import Planner from "@/components/Planner.vue";
 import GanttChart from "@/components/GanttChart.vue";
