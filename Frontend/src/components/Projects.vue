@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect } from "vue";
+import { ref, computed } from "vue";
 import Project from "./Project.vue";
 
 const emit = defineEmits("show-project");

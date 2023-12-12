@@ -106,10 +106,10 @@
 
 <script setup>
 import { ref, computed, watchEffect } from "vue";
-import PlannerWorker from "@/components/PlannerWorker.vue";
-import PlannerNewWorker from "@/components/PlannerNewWorker.vue";
-import PlannerTask from "@/components/PlannerTask.vue";
-import PlannerNewTask from "@/components/PlannerNewTask.vue";
+import PlannerWorker from "./PlannerWorker.vue";
+import PlannerNewWorker from "./PlannerNewWorker.vue";
+import PlannerTask from "./PlannerTask.vue";
+import PlannerNewTask from "./PlannerNewTask.vue";
 
 const emit = defineEmits([
   "back-to-projects",

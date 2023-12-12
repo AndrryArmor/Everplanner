@@ -17,11 +17,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import TheNavbar from "@/components/TheNavbar.vue";
-import Projects from "@/components/Projects.vue";
-import Planner from "@/components/Planner.vue";
-import GanttChart from "@/components/GanttChart.vue";
+import { ref } from "vue";
+import TheNavbar from "./components/TheNavbar.vue";
+import Projects from "./components/Projects.vue";
+import Planner from "./components/Planner.vue";
+import GanttChart from "./components/GanttChart.vue";
 
 const Modes = {
   ShowLogin: "ShowLogin",
