@@ -1,7 +1,7 @@
 <template>
   <tr @click="openProject">
     <td>
-      <button type="button" class="btn btn-outline-danger p-1 action" @click="deleteWorker">
+      <button type="button" class="btn btn-outline-danger p-1 action" @click.stop="deleteWorker">
         <i class="bi bi-trash"></i>
       </button>
     </td>

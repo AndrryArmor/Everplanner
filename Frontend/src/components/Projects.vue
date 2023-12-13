@@ -1,12 +1,17 @@
 <template>
-  <form class="container-fluid mt-3 projects">
+  <div
+    v-if="isLoading"
+    class="spinner-border text-primary position-absolute top-50 start-50"
+    style="width: 3rem; height: 3rem"
+  ></div>
+  <form v-else class="container-fluid mt-3 projects">
     <h4 class="ms-5">Проєкти користувача {{ user.name }}</h4>
     <div class="row overflow-x-auto">
       <div class="col-auto">
         <table ref="projectsTable" class="table table-hover align-middle m-0">
           <thead class="text-center">
             <tr>
-              <th v-for="header in projectsTableHeaders">
+              <th v-for="header in projectTableHeaders">
                 {{ header }}
               </th>
             </tr>
@@ -22,8 +27,7 @@
             />
             <NewProject
               :row-index="user.projects.length + 1"
-              :new-project-id="newProjectId"
-              @add-new-worker="addNewProject"
+              @add-new-project="addNewProject"
               @remove-hover="removeHover"
               @restore-hover="restoreHover"
             />
@@ -35,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount } from "vue";
+import { ref, onMounted } from "vue";
 import Project from "./Project.vue";
 import NewProject from "./NewProject.vue";
 import { useRoute } from "vue-router";
@@ -43,31 +47,54 @@ import router from "../router";
 
 const emit = defineEmits("show-project");
 
+const isLoading = ref(true);
 const route = useRoute();
 const projectsTable = ref(null);
-const projectsTableHeaders = ["", "№", "Назва", "Кількість працівників", "Кількість задач"];
+const projectTableHeaders = ["", "№", "Назва", "Кількість працівників", "Кількість задач"];
 
 const user = ref(null);
-
-const newProjectId = computed(() => {
-  if (user.value.projects.length === 0) {
-    return 0;
-  }
-
-  const sortedProjects = [...user.value.projects].sort((p1, p2) => p1.id - p2.id);
-  return sortedProjects[sortedProjects.length - 1].id + 1;
-});
 
 function openProject(projectId) {
   router.push(`/users/${route.params.userId}/projects/${projectId}`);
 }
 
-function addNewProject(project) {
-  user.value.projects = [...user.value.projects, project];
+async function addNewProject(project) {
+  try {
+    const projectId = await fetch(`https://localhost:7229/api/users/${route.params.userId}/projects`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(project),
+    }).then(async (response) => {
+      const res = await response.text();
+      if (!response.ok) {
+        throw new Error(res);
+      }
+      return parseInt(res);
+    });
+
+    project.id = projectId;
+    user.value.projects = [...user.value.projects, project];
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
-function deleteProject(projectId) {
-  user.value.projects = user.value.projects.filter((project) => project.id != projectId);
+async function deleteProject(projectId) {
+  try {
+    await fetch(`https://localhost:7229/api/users/${route.params.userId}/projects/${projectId}`, {
+      method: "DELETE",
+    }).then(async (response) => {
+      if (!response.ok) {
+        throw new Error(response.text());
+      }
+    });
+
+    user.value.projects = user.value.projects.filter((project) => project.id != projectId);
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
 function removeHover() {
@@ -78,20 +105,21 @@ function restoreHover() {
   projectsTable.value.classList.add("table-hover");
 }
 
-onBeforeMount(() => {
-  // Get user data
-  console.log("User id:", route.params.userId);
-  user.value = {
-    name: "Ачілов Андрій",
-    projects: [
-      {
-        id: 0,
-        name: "Проєкт 1",
-        workersCount: 4,
-        tasksCount: 10,
-      },
-    ],
-  };
+onMounted(async () => {
+  try {
+    user.value = await fetch(`https://localhost:7229/api/users/${route.params.userId}`).then(
+      async (response) => {
+        const res = await response.text();
+        if (!response.ok) {
+          throw new Error(res);
+        }
+        return JSON.parse(res);
+      }
+    );
+  } catch (error) {
+    alert(error.message);
+  }
+  isLoading.value = false;
 });
 </script>
 

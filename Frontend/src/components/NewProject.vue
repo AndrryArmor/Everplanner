@@ -10,41 +10,33 @@
       <input
         type="text"
         class="form-control form-control-sm"
-        v-model="newProject.name"
+        v-model="newProjectName"
         placeholder="Назва"
       />
     </td>
-    <td>{{ newProject.workersCount }}</td>
-    <td>{{ newProject.tasksCount }}</td>
+    <td>0</td>
+    <td>0</td>
   </tr>
 </template>
 
 <script setup>
-import { ref, watchEffect } from "vue";
+import { ref } from "vue";
 
 const props = defineProps({
   rowIndex: Number,
-  newProjectId: {
-    type: Number,
-    required: true,
-  },
 });
-const emit = defineEmits(["add-new-worker", "remove-hover", "restore-hover"]);
+const emit = defineEmits(["add-new-project", "remove-hover", "restore-hover"]);
 
-var newProject = resetNewProject();
-function resetNewProject() {
-  return ref({
-    id: props.newProjectId,
-    name: "",
-    workersCount: 0,
-    tasksCount: 0,
-  });
-}
-watchEffect(() => (newProject.value.id = props.newProjectId));
+var newProjectName = ref(null);
 
 function addNewProject() {
-  emit("add-new-worker", newProject.value);
-  newProject = resetNewProject();
+  emit("add-new-project", {
+    id: 0,
+    name: newProjectName.value,
+    tasks: [],
+    workers: [],
+  });
+  newProjectName.value = "";
 }
 
 function removeHover() {
