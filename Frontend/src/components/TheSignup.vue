@@ -85,7 +85,7 @@ function checkPasswordsMatch() {
   }
 }
 
-function signup(event) {
+async function signup(event) {
   const form = event.target;
   form.classList.add("was-validated");
 
@@ -93,7 +93,22 @@ function signup(event) {
   isTouched.value = true;
   checkPasswordsMatch();
   if (isValid && isPasswordsMatch.value) {
-    router.push({ path: "/login", query: { afterSignup: true } });
+    try {
+      await fetch("https://localhost:7229/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: name.value, email: email.value, password: password.value }),
+      }).then(async (response) => {
+        if (!response.ok) {
+          throw new Error(await response.text());
+        }
+      });
+      router.push({ path: "/login", query: { afterSignup: true } });
+    } catch (error) {
+      alert(error.message);
+    }
   }
 }
 </script>

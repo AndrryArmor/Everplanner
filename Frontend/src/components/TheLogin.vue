@@ -45,47 +45,47 @@
         </form>
       </div>
     </div>
-    <div
-      class="toast-container position-fixed top-0 end-0 px-3 pb-3"
-      style="padding-top: calc(56px + 1em) !important"
-    >
-      <div ref="toast" class="toast">
-        <div class="toast-header text-bg-info">
-          <strong class="me-auto">Everplanner</strong>
-          <small>Щойно</small>
-          <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-        </div>
-        <div class="toast-body">Реєстрація пройшла успішно! Тепер ввійдіть у ваш акаунт.</div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { Toast } from "bootstrap";
-import { ref, onBeforeMount } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import router from "../router";
 
 const route = useRoute();
-const toast = ref(null);
 
 const email = ref("");
 const password = ref("");
 
-function login(event) {
+async function login(event) {
   const form = event.target;
   form.classList.add("was-validated");
   if (form.checkValidity()) {
-    // Get id
-    const id = 0;
-    router.push(`/users/${id}/projects`);
+    try {
+      const userId = await fetch("https://localhost:7229/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email.value, password: password.value }),
+      }).then(async (response) => {
+        const res = await response.text();
+        if (!response.ok) {
+          throw new Error(res);
+        }
+        return parseInt(res);
+      });
+      router.push(`/users/${userId}/projects`);
+    } catch (error) {
+      alert(error.message);
+    }
   }
 }
 
-onBeforeMount(() => {
+onMounted(() => {
   if (route.query.afterSignup == "true") {
-    Toast.getOrCreateInstance(toast.value).show();
+    alert("Реєстрація пройшла успішно! Тепер ввійдіть у ваш акаунт.");
   }
 });
 </script>
