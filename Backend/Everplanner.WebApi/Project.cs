@@ -1,5 +1,4 @@
 ﻿using Everplanner.WebApi.Dto;
-using System.Threading.Tasks;
 
 namespace Everplanner.WebApi;
 
@@ -9,7 +8,7 @@ public class Project
     private List<Worker> _workers;
     private bool _isPlanned = false;
 
-    private Project(int id, string name, IEnumerable<Task> tasks, IEnumerable<Worker> workers)
+    public Project(int id, string name, IEnumerable<Task> tasks, IEnumerable<Worker> workers)
     {
         Id = id;
         Name = name;
@@ -21,7 +20,6 @@ public class Project
     public string Name { get; }
     public IReadOnlyCollection<Task> Tasks => _tasks;
     public IReadOnlyCollection<Worker> Workers => _workers;
-    public int ExpectedProjectDuration { get; init; } = int.MaxValue;
     public double EndingTime { get; private set; }
     public int UsedWorkersCount { get; private set; }
 
@@ -40,7 +38,7 @@ public class Project
         }
 
         // Fill up dependencies between tasks and workers.
-        foreach (TaskRequestModel taskDto in projectRequestModel.Tasks)
+        foreach (TaskDto taskDto in projectRequestModel.Tasks)
         {
             Task task = tasks.Find(t => t.Id == taskDto.Id)!;
             foreach (int parentTaskId in taskDto.ParentTasks)
@@ -68,10 +66,7 @@ public class Project
         }
 
         CountPriorities(tasks);
-        return new Project(projectRequestModel.Id, projectRequestModel.Name, tasks, workers)
-        {
-            ExpectedProjectDuration = projectRequestModel.ExpectedProjectDuration
-        };
+        return new Project(projectRequestModel.Id, projectRequestModel.Name, tasks, workers);
     }
 
     public static PlannedProjectResponseModel ExportPlannedProject(Project project)
@@ -98,7 +93,7 @@ public class Project
         UsedWorkersCount = CountUsedWorkers(tasksByPriority);
     }
 
-    public void PlanProjectForMinimalWorkersCount()
+    public void PlanProjectForMinimalWorkersCount(int expectedProjectDuration)
     {
         if (_isPlanned)
         {
@@ -117,9 +112,9 @@ public class Project
 
             double endingTime = tasks.Max(task => task.ExecutionStart + task.ExecutionDuration);
             Console.WriteLine($"===> Ending time: {endingTime}");
-            if (endingTime - errorCorrection > ExpectedProjectDuration)
+            if (endingTime - errorCorrection > expectedProjectDuration)
             {
-                Console.WriteLine($"===> We got over project duration {ExpectedProjectDuration} - going out.");
+                Console.WriteLine($"===> We got over project duration {expectedProjectDuration} - going out.");
                 _isPlanned = true;
                 return;
             }
