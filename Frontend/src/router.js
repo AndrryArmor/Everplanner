@@ -10,7 +10,7 @@ const routes = [
   { path: "/signup", component: TheSignup },
   { path: "/users/:userId/projects", component: Projects },
   { path: "/users/:userId/projects/:projectId", component: Planner },
-  { path: "/users/:userId/projects/:projectId/planning-results", component: GanttChart },
+  { path: "/users/:userId/projects/:projectId/plan", component: GanttChart },
 ];
 
 const router = createRouter({

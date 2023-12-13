@@ -1,21 +1,31 @@
 <template>
-  <div class="m-3">
+  <div
+    v-if="isLoading"
+    class="spinner-border text-primary position-absolute top-50 start-50"
+    style="width: 3rem; height: 3rem"
+  ></div>
+  <div v-else class="m-3">
     <h4 class="ms-5">
-      Результати планування проєкту "{{ projectStats.name }}" за {{ projectStats.titleTrait }}:
+      Результати планування проєкту "{{ plannedProject.name }}" за
+      {{ getModeTitle($route.query.mode) }}:
     </h4>
-    <template v-if="projectStats.endingTime > 0">
+    <template v-if="plannedProject.endingTime > 0">
       <p>
-        Час виконання проєкту: <b>{{ projectStats.endingTime.toFixed(2) }} днів.</b><br />
+        Час виконання проєкту: <b>{{ plannedProject.endingTime.toFixed(2) }} днів.</b><br />
         Необхідна кількість працівників:
-        <b>{{ projectStats.usedWorkers }}/{{ projectStats.workers }}</b>
+        <b>{{ plannedProject.usedWorkersCount }}/{{ plannedProject.workers.length }}</b>
       </p>
       <b>Діаграма Ганта:</b>
       <div class="overflow-x-auto">
-        <BarChart :chart-data="chartData" :options="chartOptions" :style="style" />
+        <BarChart
+          :chart-data="generateChartDataFromPlannedProject()"
+          :options="chartOptions"
+          :style="style"
+        />
       </div>
     </template>
     <template v-else>
-      <p>Проєкт неможливо виконати за {{ projectStats.expectedProjectDuration }} дні(в).</p>
+      <p>Проєкт неможливо виконати за {{ $route.query.expectedProjectDuration }} дні(в).</p>
     </template>
     <button type="button" class="btn btn-lg btn-primary m-2" @click="backToPlanning">
       Назад до планування проєкту
@@ -24,23 +34,20 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import router from "../router";
 import { BarChart } from "vue-chart-3";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import autocolors from "chartjs-plugin-autocolors";
 import { Chart, registerables } from "chart.js";
+import { defaults } from "chart.js";
 Chart.register(...registerables, ChartDataLabels, autocolors);
 
-const props = defineProps({
-  chartData: {
-    type: Object,
-    required: true,
-  },
-  projectStats: {
-    type: Object,
-    reqiured: true,
-  },
-});
-const emit = defineEmits(["backToPlanning"]);
+const isLoading = ref(true);
+const route = useRoute();
+
+const plannedProject = ref(null);
 
 const chartOptions = {
   responsive: true,
@@ -75,7 +82,7 @@ const chartOptions = {
         font: {
           size: 16,
         },
-        callback: function (value, index) {
+        callback: function (value) {
           var label = this.getLabelForValue(value);
           return label.length > 30 ? label.slice(0, 29) + "..." : label;
         },
@@ -86,7 +93,7 @@ const chartOptions = {
     legend: {
       display: true,
       labels: {
-        filter: function (item, context) {
+        filter: function (item) {
           return item.text !== undefined;
         },
       },
@@ -113,20 +120,96 @@ const chartOptions = {
     },
   },
 };
-const style = {
-  width: `max(100vw - 2em - 20px, ${500 + 31 * props.projectStats.endingTime}px)`,
-  "max-width": `max(100vw - 2em - 20px, ${500 + 31 * props.projectStats.endingTime}px)`,
-  height: `max(100px + 25vh, ${100 + 40 * props.projectStats.tasks}px)`,
-  "max-height": `max(100px + 25vh, ${100 + 40 * props.projectStats.tasks}px)`,
-};
 
-function backToPlanning() {
-  emit("backToPlanning");
-}
+const style = computed(() => {
+  if (isLoading) {
+    return;
+  }
+
+  return {
+    width: `max(100vw - 2em - 20px, ${500 + 31 * plannedProject.value.endingTime}px)`,
+    "max-width": `max(100vw - 2em - 20px, ${500 + 31 * plannedProject.value.endingTime}px)`,
+    height: `max(100px + 25vh, ${100 + 40 * plannedProject.value.tasks}px)`,
+    "max-height": `max(100px + 25vh, ${100 + 40 * plannedProject.value.tasks}px)`,
+  };
+});
 
 function isLightColor(color) {
   const rgb = color.match(/\d+/g).map(Number);
   const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
   return brightness > 128;
 }
+
+function generateChartDataFromPlannedProject() {
+  const labels = new Array(plannedProject.value.tasks.length);
+  const shift = new Array(plannedProject.value.tasks.length);
+  const workerBars = plannedProject.value.workers.map((worker) => {
+    return {
+      label: worker.name,
+      data: new Array(plannedProject.value.tasks.length),
+    };
+  });
+
+  for (let i = 0; i < plannedProject.value.tasks.length; i++) {
+    const task = plannedProject.value.tasks[i];
+    labels[i] = task.name;
+    shift[i] = task.executionStart;
+    for (let j = 0; j < plannedProject.value.workers.length; j++) {
+      const worker = plannedProject.value.workers[j];
+      workerBars[j].data[i] = task.executor === worker.id ? task.executionDuration : 0;
+    }
+  }
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        datalabels: {
+          labels: {
+            title: null,
+          },
+        },
+        data: shift,
+        backgroundColor: "rgba(0, 0, 0, 0)",
+      },
+      ...workerBars,
+    ],
+  };
+}
+
+function backToPlanning() {
+  router.push({
+    path: `/users/${route.params.userId}/projects/${route.params.projectId}`,
+  });
+}
+
+function getModeTitle(mode) {
+  switch (mode) {
+    case "MinimalTime":
+      return "мінімальний час";
+    case "MinimalWorkersCount":
+      return "мінімальну кількість співробітників";
+    default:
+      alert(`${mode} є недійсним значенням для способу планування проєкту.`);
+  }
+}
+
+onMounted(async () => {
+  try {
+    console.log(route.query);
+    var queryString = new URLSearchParams(route.query).toString();
+    plannedProject.value = await fetch(
+      `https://localhost:7229/api/users/${route.params.userId}/projects/${route.params.projectId}/plan?${queryString}`
+    ).then(async (response) => {
+      const res = await response.text();
+      if (!response.ok) {
+        throw new Error(res);
+      }
+      return JSON.parse(res);
+    });
+  } catch (error) {
+    alert(error.message);
+  }
+  isLoading.value = false;
+});
 </script>
