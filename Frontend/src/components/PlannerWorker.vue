@@ -5,7 +5,7 @@
         <i class="bi bi-trash"></i>
       </button>
     </td>
-    <td>{{ worker.id }}</td>
+    <td>{{ rowIndex }}</td>
     <td>{{ worker.name }}</td>
     <td>{{ worker.salary }}{{ dollarSign }}</td>
     <td>{{ worker.developmentVelocity }} {{ developmentVelocityMetric }}</td>
@@ -14,6 +14,7 @@
 
 <script setup>
 const props = defineProps({
+  rowIndex: Number,
   worker: {
     type: Object,
     required: true,

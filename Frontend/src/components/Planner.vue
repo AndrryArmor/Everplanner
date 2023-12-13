@@ -1,37 +1,29 @@
 <template>
-  <div class="container-fluid my-3 actions">
-    <div class="row">
-      <div class="col-lg-auto">
-        <button type="button" class="btn btn-secondary w-100" @click="backToProjects">
-          <i class="bi bi-arrow-left"></i>
-          Назад до списку проєктів
-        </button>
-      </div>
-    </div>
-  </div>
-  <h1 class="ms-5">Проєкт 1</h1>
+  <h1 class="ms-5 mt-3">Проєкт 1</h1>
   <form class="container-fluid mt-3 workers">
     <h4 class="ms-5">Співробітники</h4>
     <div class="row overflow-x-auto">
       <div class="col-auto">
         <table class="table align-middle m-0">
-          <thead>
+          <thead class="text-center">
             <tr>
-              <th v-for="header in workersTableHeaders" class="text-center align-middle">
+              <th v-for="header in workersTableHeaders">
                 {{ header }}
               </th>
             </tr>
           </thead>
           <tbody>
             <PlannerWorker
-              v-for="worker in workers"
+              v-for="(worker, index) in workers"
               :key="worker.id"
+              :row-index="index + 1"
               :worker="worker"
               :dollar-sign="dollarSign"
               :development-velocity-metric="developmentVelocityMetric"
               @delete-worker="deleteWorker"
             />
             <PlannerNewWorker
+              :row-index="workers.length + 1"
               :new-worker-id="newWorkerId"
               :dollar-sign="dollarSign"
               :development-velocity-metric="developmentVelocityMetric"
@@ -47,17 +39,18 @@
     <div class="row overflow-x-auto">
       <div class="col-auto">
         <table class="table align-middle m-0">
-          <thead>
+          <thead class="text-center">
             <tr>
-              <th v-for="header in tasksTableHeaders" class="text-center align-middle">
+              <th v-for="header in tasksTableHeaders">
                 {{ header }}
               </th>
             </tr>
           </thead>
           <tbody>
             <PlannerTask
-              v-for="task in tasks"
+              v-for="(task, index) in tasks"
               :key="task.id"
+              :row-index="index + 1"
               :task="task"
               :tasks="tasks"
               :workers="workers"
@@ -69,6 +62,7 @@
               @delete-available-worker="deleteAvailableWorker"
             />
             <PlannerNewTask
+              :row-index="tasks.length + 1"
               :new-task-id="newTaskId"
               :tasks="tasks"
               :workers="workers"
@@ -105,17 +99,24 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect } from "vue";
+import { ref, computed, watchEffect, onBeforeMount } from "vue";
+import { useRoute } from "vue-router";
+import router from "../router";
 import PlannerWorker from "./PlannerWorker.vue";
 import PlannerNewWorker from "./PlannerNewWorker.vue";
 import PlannerTask from "./PlannerTask.vue";
 import PlannerNewTask from "./PlannerNewTask.vue";
+import Project from "./Project.vue";
 
 const emit = defineEmits([
   "back-to-projects",
   "plan-project-for-minimal-time",
   "plan-project-for-minimal-workers-count",
 ]);
+
+const route = useRoute();
+
+const project = ref(null);
 
 const dollarSign = "$";
 const storyPointsSign = "SP";
@@ -125,7 +126,7 @@ function backToProjects() {
   emit("back-to-projects");
 }
 
-const workersTableHeaders = ["", "ID", "ПІБ", "Зарплата", "Швидкість розробки"];
+const workersTableHeaders = ["", "№", "ПІБ", "Зарплата", "Швидкість розробки"];
 const workers = ref([
   {
     id: 1,
@@ -172,7 +173,7 @@ function deleteWorker(workerId) {
 
 const tasksTableHeaders = [
   "",
-  "ID",
+  "№",
   "Назва задачі",
   "Складність",
   "Залежить від",
@@ -313,6 +314,111 @@ function planProjectForMinimalTime() {
 function planProjectForMinimalWorkersCount() {
   emit("plan-project-for-minimal-workers-count", tasks.value, workers.value);
 }
+
+onBeforeMount(() => {
+  // Get project data
+  console.log(`User id: ${route.params.userId}, project id: ${route.params.projectId}`);
+  project.value = {
+    tasks: [
+      {
+        id: 1,
+        name: "Задача 1",
+        complexity: 5,
+        parentTasks: [],
+        availableWorkers: [1, 2, 3, 4],
+      },
+      {
+        id: 2,
+        name: "Задача 2",
+        complexity: 10,
+        parentTasks: [],
+        availableWorkers: [1, 2, 3, 4],
+      },
+      {
+        id: 3,
+        name: "Задача 3",
+        complexity: 2,
+        parentTasks: [],
+        availableWorkers: [1, 2, 3, 4],
+      },
+      {
+        id: 4,
+        name: "Задача 4",
+        complexity: 6,
+        parentTasks: [],
+        availableWorkers: [1, 2, 3, 4],
+      },
+      {
+        id: 5,
+        name: "Задача 5",
+        complexity: 8,
+        parentTasks: [1],
+        availableWorkers: [1, 2, 3, 4],
+      },
+      {
+        id: 6,
+        name: "Задача 6",
+        complexity: 7,
+        parentTasks: [1, 2, 3],
+        availableWorkers: [1, 2, 3, 4],
+      },
+      {
+        id: 7,
+        name: "Задача 7",
+        complexity: 1,
+        parentTasks: [3, 4],
+        availableWorkers: [1, 2, 3, 4],
+      },
+      {
+        id: 8,
+        name: "Задача 8",
+        complexity: 4,
+        parentTasks: [5],
+        availableWorkers: [1, 2, 3, 4],
+      },
+      {
+        id: 9,
+        name: "Задача 9",
+        complexity: 2,
+        parentTasks: [6, 7],
+        availableWorkers: [1, 2, 3, 4],
+      },
+      {
+        id: 10,
+        name: "Задача 10",
+        complexity: 5,
+        parentTasks: [8, 9],
+        availableWorkers: [1, 2, 3, 4],
+      },
+    ],
+    workers: [
+      {
+        id: 1,
+        name: "Співробітник 1",
+        salary: 150,
+        developmentVelocity: 15,
+      },
+      {
+        id: 2,
+        name: "Співробітник 2",
+        salary: 100,
+        developmentVelocity: 10,
+      },
+      {
+        id: 3,
+        name: "Співробітник 3",
+        salary: 30,
+        developmentVelocity: 3,
+      },
+      {
+        id: 4,
+        name: "Співробітник 4",
+        salary: 20,
+        developmentVelocity: 2,
+      },
+    ],
+  };
+});
 </script>
 
 <style scoped lang="scss">

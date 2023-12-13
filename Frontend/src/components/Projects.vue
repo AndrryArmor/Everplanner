@@ -1,25 +1,32 @@
 <template>
   <form class="container-fluid mt-3 projects">
-    <h4 class="ms-5">Проєкти користувача Ачілов Андрій</h4>
+    <h4 class="ms-5">Проєкти користувача {{ user.name }}</h4>
     <div class="row overflow-x-auto">
       <div class="col-auto">
-        <table class="table table-hover m-0">
-          <thead>
+        <table ref="projectsTable" class="table table-hover align-middle m-0">
+          <thead class="text-center">
             <tr>
-              <th v-for="header in projectsTableHeaders" class="text-center align-middle">
+              <th v-for="header in projectsTableHeaders">
                 {{ header }}
               </th>
             </tr>
           </thead>
           <tbody>
             <Project
-              v-for="project in projects"
+              v-for="(project, index) in user.projects"
               :key="project.id"
+              :row-index="index + 1"
               :project="project"
               @open-project="openProject"
               @delete-project="deleteProject"
             />
-            <NewProject :new-project-id="newProjectId" @add-new-worker="addNewProject" />
+            <NewProject
+              :row-index="user.projects.length + 1"
+              :new-project-id="newProjectId"
+              @add-new-worker="addNewProject"
+              @remove-hover="removeHover"
+              @restore-hover="restoreHover"
+            />
           </tbody>
         </table>
       </div>
@@ -28,43 +35,64 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onBeforeMount } from "vue";
 import Project from "./Project.vue";
+import NewProject from "./NewProject.vue";
+import { useRoute } from "vue-router";
+import router from "../router";
 
 const emit = defineEmits("show-project");
 
-const projectsTableHeaders = ["", "ID", "Назва", "Кількість працівників", "Кількість задач"];
-const projects = ref([
-  {
-    id: 0,
-    name: "Проєкт 1",
-    workersCount: 4,
-    tasksCount: 10,
-  },
-]);
+const route = useRoute();
+const projectsTable = ref(null);
+const projectsTableHeaders = ["", "№", "Назва", "Кількість працівників", "Кількість задач"];
+
+const user = ref(null);
 
 const newProjectId = computed(() => {
-  if (projects.value.length === 0) {
+  if (user.value.projects.length === 0) {
     return 0;
   }
 
-  const sortedProjects = [...projects.value].sort(
-    (project1, project2) => project1.id - project2.id
-  );
+  const sortedProjects = [...user.value.projects].sort((p1, p2) => p1.id - p2.id);
   return sortedProjects[sortedProjects.length - 1].id + 1;
 });
 
 function openProject(projectId) {
-  emit("show-project", projects.value.filter((project) => project.id === projectId)[0]);
+  router.push(`/users/${route.params.userId}/projects/${projectId}`);
 }
 
 function addNewProject(project) {
-  projects.value = [...projects.value, project];
+  user.value.projects = [...user.value.projects, project];
 }
 
 function deleteProject(projectId) {
-  projects.value = projects.value.filter((project) => project.id != projectId);
+  user.value.projects = user.value.projects.filter((project) => project.id != projectId);
 }
+
+function removeHover() {
+  projectsTable.value.classList.remove("table-hover");
+}
+
+function restoreHover() {
+  projectsTable.value.classList.add("table-hover");
+}
+
+onBeforeMount(() => {
+  // Get user data
+  console.log("User id:", route.params.userId);
+  user.value = {
+    name: "Ачілов Андрій",
+    projects: [
+      {
+        id: 0,
+        name: "Проєкт 1",
+        workersCount: 4,
+        tasksCount: 10,
+      },
+    ],
+  };
+});
 </script>
 
 <style scoped lang="scss">

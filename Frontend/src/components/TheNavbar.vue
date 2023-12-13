@@ -14,7 +14,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <div class="navbar-nav me-auto">
-          <router-link to="/projects" class="nav-link">Проєкти</router-link>
+          <router-link to="/users/0/projects" class="nav-link">Проєкти</router-link>
         </div>
         <div class="navbar-nav">
           <span class="nav-link active user-select-none">Ачілов Андрій</span>

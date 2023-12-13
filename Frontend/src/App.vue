@@ -1,27 +1,11 @@
 <template>
   <TheNavbar />
   <router-view></router-view>
-  <Projects v-if="mode === Modes.ShowProjects" @show-project="showProject" />
-  <Planner
-    v-else-if="mode === Modes.ShowPlanner"
-    @back-to-projects="backToProjects"
-    @plan-project-for-minimal-time="planProjectForMinimalTime"
-    @plan-project-for-minimal-workers-count="planProjectForMinimalWorkersCount"
-  />
-  <GanttChart
-    v-else-if="mode === Modes.ShowChart"
-    :chart-data="chartData"
-    :project-stats="projectStats"
-    @back-to-planning="backToPlanning"
-  />
 </template>
 
 <script setup>
 import { ref } from "vue";
 import TheNavbar from "./components/TheNavbar.vue";
-import Projects from "./components/Projects.vue";
-import Planner from "./components/Planner.vue";
-import GanttChart from "./components/GanttChart.vue";
 
 const Modes = {
   ShowLogin: "ShowLogin",

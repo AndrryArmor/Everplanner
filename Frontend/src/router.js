@@ -8,9 +8,9 @@ import GanttChart from "./components/GanttChart.vue";
 const routes = [
   { path: "/login", component: TheLogin },
   { path: "/signup", component: TheSignup },
-  { path: "/projects", component: Projects },
-  { path: "/projects/project", component: Planner },
-  { path: "/projects/project/planning-results", component: GanttChart },
+  { path: "/users/:userId/projects", component: Projects },
+  { path: "/users/:userId/projects/:projectId", component: Planner },
+  { path: "/users/:userId/projects/:projectId/planning-results", component: GanttChart },
 ];
 
 const router = createRouter({

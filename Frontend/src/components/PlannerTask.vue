@@ -5,7 +5,7 @@
         <i class="bi bi-trash"></i>
       </button>
     </td>
-    <td>{{ task.id }}</td>
+    <td>{{ rowIndex }}</td>
     <td>{{ task.name }}</td>
     <td>{{ task.complexity }} {{ storyPointsSign }}</td>
     <td>
@@ -86,6 +86,7 @@
 import { ref, computed } from "vue";
 
 const props = defineProps({
+  rowIndex: Number,
   task: {
     type: Object,
     required: true,

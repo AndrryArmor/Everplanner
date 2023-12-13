@@ -5,7 +5,7 @@
         <i class="bi bi-check-square"></i>
       </button>
     </td>
-    <td>{{ newWorker.id }}</td>
+    <td>{{ rowIndex }}</td>
     <td>
       <input
         type="text"
@@ -46,6 +46,7 @@
 import { ref, watchEffect } from "vue";
 
 const props = defineProps({
+  rowIndex: Number,
   newWorkerId: {
     type: Number,
     required: true,

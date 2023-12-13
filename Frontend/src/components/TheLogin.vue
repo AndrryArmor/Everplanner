@@ -63,25 +63,27 @@
 
 <script setup>
 import { Toast } from "bootstrap";
-import { ref, onMounted } from "vue";
+import { ref, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
 import router from "../router";
 
-const email = ref("");
-const password = ref("");
-
 const route = useRoute();
 const toast = ref(null);
+
+const email = ref("");
+const password = ref("");
 
 function login(event) {
   const form = event.target;
   form.classList.add("was-validated");
   if (form.checkValidity()) {
-    router.push("/projects");
+    // Get id
+    const id = 0;
+    router.push(`/users/${id}/projects`);
   }
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   if (route.query.afterSignup == "true") {
     Toast.getOrCreateInstance(toast.value).show();
   }
