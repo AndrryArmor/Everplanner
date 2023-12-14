@@ -30,7 +30,6 @@
               />
               <PlannerNewWorker
                 :row-index="project.workers.length + 1"
-                :new-worker-id="newWorkerId"
                 :dollar-sign="dollarSign"
                 :development-velocity-metric="developmentVelocityMetric"
                 @add-new-worker="addNewWorker"
@@ -69,11 +68,10 @@
               />
               <PlannerNewTask
                 :row-index="project.tasks.length + 1"
-                :new-task-id="newTaskId"
                 :tasks="project.tasks"
                 :workers="project.workers"
                 :story-points-sign="storyPointsSign"
-                @add-new-task="addNewTask"
+                @add-new-task="addTask"
               />
             </tbody>
           </table>
@@ -113,7 +111,6 @@ import PlannerWorker from "./PlannerWorker.vue";
 import PlannerNewWorker from "./PlannerNewWorker.vue";
 import PlannerTask from "./PlannerTask.vue";
 import PlannerNewTask from "./PlannerNewTask.vue";
-import Project from "./Project.vue";
 
 const emit = defineEmits([
   "back-to-projects",
@@ -134,29 +131,51 @@ const route = useRoute();
 
 const project = ref(null);
 
-function backToProjects() {
-  emit("back-to-projects");
-}
-
 const workersTableHeaders = ["", "№", "ПІБ", "Зарплата", "Швидкість розробки"];
 
-const newWorkerId = computed(() => {
-  if (project.value.workers.length === 0) {
-    return 1;
+async function addNewWorker(worker) {
+  try {
+    const newWorkerId = await fetch(
+      `https://localhost:7229/api/users/${route.params.userId}/projects/${route.params.projectId}/workers`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(worker),
+      }
+    ).then(async (response) => {
+      const res = await response.text();
+      if (!response.ok) {
+        throw new Error(res);
+      }
+      return parseInt(res);
+    });
+
+    worker.id = newWorkerId;
+    project.value.workers = [...project.value.workers, worker];
+  } catch (error) {
+    alert(error.message);
   }
-
-  const sortedWorkers = [...project.value.workers].sort(
-    (worker1, worker2) => worker1.id - worker2.id
-  );
-  return sortedWorkers[sortedWorkers.length - 1].id + 1;
-});
-
-function addNewWorker(worker) {
-  project.value.workers = [...project.value.workers, worker];
 }
 
-function deleteWorker(workerId) {
-  project.value.workers = project.value.workers.filter((worker) => worker.id != workerId);
+async function deleteWorker(workerId) {
+  try {
+    await fetch(
+      `https://localhost:7229/api/users/${route.params.userId}/projects/${route.params.projectId}/workers/${workerId}`,
+      {
+        method: "DELETE",
+      }
+    ).then(async (response) => {
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+    });
+
+    project.value = await getProject();
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
 const tasksTableHeaders = [
@@ -168,62 +187,93 @@ const tasksTableHeaders = [
   "Доступні співробітники для виконання",
 ];
 
-const newTaskId = computed(() => {
-  if (project.value.tasks.length === 0) {
-    return 1;
-  }
-
-  var sortedTasks = [...project.value.tasks].sort((task1, task2) => task1.id - task2.id);
-  return sortedTasks[sortedTasks.length - 1].id + 1;
-});
-
-// Видаляє неіснуючі батьківські задачі зі списку батьків кожної з задач
-// і неіснуючих співробітників із списку доступнимх співробітників кожної з задач.
-watchEffect(() => {
-  if (isLoading.value) {
-    return;
-  }
-
-  project.value.tasks.forEach((task) => {
-    task.parentTasks = task.parentTasks.filter((parentTask) => {
-      // Шукає чи є серед усіх задач хоча б одна, яка дорівнює parentTask.
-      // Якщо нема - значить parentTask це видалена задача.
-      return project.value.tasks.some((t) => t.id == parentTask);
+async function addTask(task) {
+  try {
+    const newTaskId = await fetch(
+      `https://localhost:7229/api/users/${route.params.userId}/projects/${route.params.projectId}/tasks`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(task),
+      }
+    ).then(async (response) => {
+      const res = await response.text();
+      if (!response.ok) {
+        throw new Error(res);
+      }
+      return parseInt(res);
     });
 
-    task.availableWorkers = task.availableWorkers.filter((worker) => {
-      // Шукає чи є серед усіх співробітників хоча б один, який дорівнює worker.
-      // Якщо нема - значить worker це видалений співробітник.
-      return project.value.workers.some((w) => w.id == worker);
+    task.id = newTaskId;
+    project.value.tasks = [...project.value.tasks, task];
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function updateTask(task) {
+  try {
+    await fetch(
+      `https://localhost:7229/api/users/${route.params.userId}/projects/${route.params.projectId}/tasks/${task.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(task),
+      }
+    ).then(async (response) => {
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
     });
-  });
-});
-
-function addNewTask(task) {
-  project.value.tasks = [...project.value.tasks, task];
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
-function deleteTask(taskId) {
-  project.value.tasks = project.value.tasks.filter((task) => task.id != taskId);
+async function deleteTask(taskId) {
+  try {
+    await fetch(
+      `https://localhost:7229/api/users/${route.params.userId}/projects/${route.params.projectId}/tasks/${taskId}`,
+      {
+        method: "DELETE",
+      }
+    ).then(async (response) => {
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+    });
+
+    project.value = await getProject();
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
-function addParentTask(taskId, parentTaskId) {
+async function addParentTask(taskId, parentTaskId) {
   var foundTask = project.value.tasks.find((task) => task.id == taskId);
+  updateTask(foundTask);
   foundTask.parentTasks = [...foundTask.parentTasks, parentTaskId];
 }
 
-function deleteParentTask(taskId, parentTaskId) {
+async function deleteParentTask(taskId, parentTaskId) {
   var foundTask = project.value.tasks.find((task) => task.id == taskId);
+  updateTask(foundTask);
   foundTask.parentTasks = foundTask.parentTasks.filter((task) => task != parentTaskId);
 }
 
-function addAvailableWorker(taskId, workerId) {
+async function addAvailableWorker(taskId, workerId) {
   var foundTask = project.value.tasks.find((task) => task.id == taskId);
+  updateTask(foundTask);
   foundTask.availableWorkers = [...foundTask.availableWorkers, workerId];
 }
 
-function deleteAvailableWorker(taskId, workerId) {
+async function deleteAvailableWorker(taskId, workerId) {
   var foundTask = project.value.tasks.find((task) => task.id == taskId);
+  updateTask(foundTask);
   foundTask.availableWorkers = foundTask.availableWorkers.filter((task) => task != workerId);
 }
 
@@ -247,9 +297,10 @@ function planProject(mode) {
   }
 }
 
-onMounted(async () => {
+async function getProject() {
+  var project = null;
   try {
-    project.value = await fetch(
+    project = await fetch(
       `https://localhost:7229/api/users/${route.params.userId}/projects/${route.params.projectId}`
     ).then(async (response) => {
       const res = await response.text();
@@ -261,6 +312,12 @@ onMounted(async () => {
   } catch (error) {
     alert(error.message);
   }
+
+  return project;
+}
+
+onMounted(async () => {
+  project.value = await getProject();
   isLoading.value = false;
 });
 </script>
