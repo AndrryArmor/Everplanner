@@ -196,7 +196,6 @@ function getModeTitle(mode) {
 
 onMounted(async () => {
   try {
-    console.log(route.query);
     var queryString = new URLSearchParams(route.query).toString();
     plannedProject.value = await fetch(
       `https://localhost:7229/api/users/${route.params.userId}/projects/${route.params.projectId}/plan?${queryString}`

@@ -1,138 +1,147 @@
-﻿using Everplanner.WebApi.Dto;
+﻿using Everplanner.WebApi.Core;
+using Everplanner.WebApi.Dto;
 
 namespace Everplanner.WebApi.Planning;
 
 public class ProjectPlanner
 {
+    private readonly Project _project;
+    private readonly PlanningMode _mode;
+    private readonly int _expectedProjectDuration;
+
     private List<Task> _tasks;
     private List<Worker> _workers;
-    private bool _isPlanned = false;
+    private PlannedProjectDto? _plannedProject;
 
-    public ProjectPlanner(int id, string name, IEnumerable<Task> tasks, IEnumerable<Worker> workers)
+    public ProjectPlanner(Project project, PlanningMode mode, int expectedProjectDuration = int.MaxValue)
     {
-        Id = id;
-        Name = name;
-        _tasks = tasks.ToList();
-        _workers = workers.ToList();
+        _project = project;
+        _mode = mode;
+        _expectedProjectDuration = expectedProjectDuration;
+
+        (_tasks, _workers) = CopyTasksAndWorkersFromProject(_project);
+        CountPriorities(_tasks);
     }
 
-    public int Id { get; }
-    public string Name { get; }
-    public IReadOnlyCollection<Task> Tasks => _tasks;
-    public IReadOnlyCollection<Worker> Workers => _workers;
-    public double EndingTime { get; private set; }
-    public int UsedWorkersCount { get; private set; }
-
-    public static ProjectPlanner BuildProject(ProjectRequestModel projectRequestModel)
+    public PlannedProjectDto PlanProject()
     {
-        List<Task> tasks = projectRequestModel.Tasks
-            .Select(t => new Task(t.Id, t.Name, t.Complexity))
+        if (_plannedProject is not null)
+        {
+            return _plannedProject;
+        }
+
+        switch (_mode)
+        {
+            case PlanningMode.MinimalTime:
+                PlanProjectForMinimalTime();
+                break;
+            case PlanningMode.MinimalWorkersCount:
+                PlanProjectForMinimalWorkersCount();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException("Невідомий режим планування.");
+        }
+
+        List<PlannedTaskDto> tasksForExport = _tasks
+            .Select(t => new PlannedTaskDto(t.Id, t.Name, t.ExecutionStart, t.ExecutionDuration, t.Executor!.Id))
             .ToList();
-        List<Worker> workers = projectRequestModel.Workers
-            .Select(w => new Worker(w.Id, w.Name, w.Salary, w.DevelopmentVelocity))
+        List<PlannedWorkerDto> workersForExport = _workers
+            .Select(w => new PlannedWorkerDto(w.Id, w.Name))
             .ToList();
 
-        if (workers.Count == 0)
-        {
-            throw new InvalidOperationException($"Немає працівників для планування проєкту {projectRequestModel.Name}.");
-        }
+        List<PlannedWorkerDto> nonUsedWorkers = _project.Workers
+            .Where(w => !workersForExport.Any(wfe => wfe.Id == w.Id))
+            .Select(w => new PlannedWorkerDto(w.Id, w.Name))
+            .ToList();
+        workersForExport.AddRange(nonUsedWorkers);
 
-        // Fill up dependencies between tasks and workers.
-        foreach (TaskDto taskDto in projectRequestModel.Tasks)
-        {
-            Task task = tasks.Find(t => t.Id == taskDto.Id)!;
-            foreach (int parentTaskId in taskDto.ParentTasks)
-            {
-                Task? parentTask = tasks.Find(t => t.Id == parentTaskId)
-                    ?? throw new InvalidOperationException($"Задача з id={parentTaskId} не існує в проєкті {projectRequestModel.Name}.");
+        double endingTime = _tasks.Any() ? _tasks.Max(task => task.ExecutionStart + task.ExecutionDuration) : 0;
+        int usedWorkersCount = CountUsedWorkers(_tasks);
 
-                // Planning works with child tasks is easier for the algorithm than vice versa.
-                parentTask.ChildTasks.Add(task);
-            }
+        IEnumerable<PlannedTaskDto> sortedTasksForExport = _project.Tasks.Join(tasksForExport, 
+            projectTask => projectTask.Id,
+            exportTask => exportTask.Id,
+            (projectTask, exportTask) => exportTask);
 
-            foreach (int workerId in taskDto.AvailableWorkers)
-            {
-                Worker? availableWorker = workers.Find(w => w.Id == workerId) 
-                    ?? throw new InvalidOperationException($"Співробітник з id={workerId} не існує в проєкті {projectRequestModel.Name}.");
-                task.AvailableWorkers.Add(availableWorker);
-            }
-        }
+        IEnumerable<PlannedWorkerDto> sortedWorkersForExport = _project.Workers.Join(workersForExport,
+            projectWorker => projectWorker.Id,
+            exportWorker => exportWorker.Id,
+            (projectWorker, exportWorker) => exportWorker);
 
-        CountPriorities(tasks);
-        return new ProjectPlanner(projectRequestModel.Id, projectRequestModel.Name, tasks, workers);
+        _plannedProject = new PlannedProjectDto(_project.Id, _project.Name, sortedTasksForExport, sortedWorkersForExport,
+            endingTime, usedWorkersCount);
+        return _plannedProject;
     }
 
-    public static PlannedProjectResponseModel ExportPlannedProject(ProjectPlanner project)
+    private void PlanProjectForMinimalTime()
     {
-        var tasksForExport = project.Tasks
-            .Select(t => new TaskResponseModel(t.Id, t.Name, t.ExecutionStart, t.ExecutionDuration, t.Executor!.Id));
-        var workersForExport = project.Workers.Select(w => new WorkerResponseModel(w.Id, w.Name));
-        return new PlannedProjectResponseModel(project.Id, project.Name, tasksForExport, workersForExport,
-            project.EndingTime, project.UsedWorkersCount);
+        _tasks = GetTasksByPriority(_tasks);
+        PlanProjectInner(_tasks, _workers);
     }
 
-    public void PlanProjectForMinimalTime()
+    private void PlanProjectForMinimalWorkersCount()
     {
-        if (_isPlanned)
-        {
-            return;
-        }
-
-        List<Task> tasksByPriority = GetTasksByPriority().ToList();
-        PlanProjectInner(tasksByPriority, _workers);
-
-        _isPlanned = true;
-        EndingTime = tasksByPriority.Max(task => task.ExecutionStart + task.ExecutionDuration);
-        UsedWorkersCount = CountUsedWorkers(tasksByPriority);
-    }
-
-    public void PlanProjectForMinimalWorkersCount(int expectedProjectDuration)
-    {
-        if (_isPlanned)
-        {
-            return;
-        }
-
-        List<Task> tasks = GetTasksByPriority().ToList();
-        List<Worker> workers = GetWorkersByVelocity().ToList();
+        _tasks = GetTasksByPriority(_tasks);
+        _workers = GetWorkersByVelocity(_workers);
+        var lastTasks = new List<Task>();
+        var lastWorkers = new List<Worker>();
         // Used to properly handle situation when project ends just in time but small error make it go over expected duration.
         double errorCorrection = 0.000_001;
-        for (int i = 0; i < _workers.Count; i++)
+        int workersCount = _workers.Count;
+        for (int i = 0; i < workersCount; i++)
         {
             Console.WriteLine(new string('=', 20));
-            Console.WriteLine($"===> Loop {i + 1}, {workers.Count} worker(s) used: [{string.Join(", ", workers.Select(w => w.Name))}]");
-            PlanProjectInner(tasks, workers);
+            Console.WriteLine($"===> Loop {i + 1}, {_workers.Count} worker(s) used: [{string.Join(", ", _workers.Select(w => w.Name))}]");
+            PlanProjectInner(_tasks, _workers);
 
-            double endingTime = tasks.Max(task => task.ExecutionStart + task.ExecutionDuration);
+            double endingTime = _tasks.Max(task => task.ExecutionStart + task.ExecutionDuration);
             Console.WriteLine($"===> Ending time: {endingTime}");
-            if (endingTime - errorCorrection > expectedProjectDuration)
+            if (endingTime - errorCorrection > _expectedProjectDuration)
             {
-                Console.WriteLine($"===> We got over project duration {expectedProjectDuration} - going out.");
-                _isPlanned = true;
-                return;
+                Console.WriteLine($"===> We got over project duration {_expectedProjectDuration} - going out.");
+                break;
             }
 
-            // Saving only tasks and not workers because we want to send data about ALL workers
-            // and not only about chosen ones for tasks.
-            _tasks = tasks.OrderBy(t => t.Id).ToList();
-            EndingTime = endingTime;
-            UsedWorkersCount = CountUsedWorkers(tasks);
-            tasks = CloneTasks(tasks);
-            workers.ForEach(w => w.Availability = 0);
+            lastTasks.Clear();
+            lastTasks.AddRange(_tasks.Select(t => new Task(t.Id, t.Name, t.Complexity)
+            {
+                Priority = t.Priority,
+                Availability = t.Availability,
+                Executor = t.Executor,
+                ExecutionStart = t.ExecutionStart,
+                ExecutionDuration = t.ExecutionDuration,
+            }));
+            lastWorkers.Clear();
+            lastWorkers.AddRange(_workers.Select(w => new Worker(w.Id, w.Name, w.Salary, w.DevelopmentVelocity)
+            {
+                Availability = w.Availability
+            }));
 
-            Worker? workerToRemove = FindWorkerToRemove(tasks, workers);
+            _tasks.ForEach(t =>
+            {
+                t.Executor = null;
+                t.ExecutionStart = default;
+                t.ExecutionDuration = default;
+                t.Availability = default;
+            });
+            _workers.ForEach(w => w.Availability = default);
+
+            Worker? workerToRemove = FindWorkerToRemove(_tasks, _workers);
             if (workerToRemove is null)
             {
                 Console.WriteLine("===> Cannot remove more workers - going out.");
-                _isPlanned = true;
-                return;
+                break;
             }
 
             Console.WriteLine($"===> Removing worker {workerToRemove.Id}: {workerToRemove.Name}\n");
-            workers.Remove(workerToRemove);
-            tasks.ForEach(t => t.AvailableWorkers.Remove(workerToRemove));
+            _workers.Remove(workerToRemove);
+            _tasks.ForEach(t => t.AvailableWorkers.Remove(workerToRemove));
         }
 
+        _tasks.Clear();
+        _tasks.AddRange(lastTasks);
+        _workers.Clear();
+        _workers.AddRange(lastWorkers);
         Console.WriteLine("===> End of planning for minimal workers count.");
     }
 
@@ -208,16 +217,16 @@ public class ProjectPlanner
         return task.Priority;
     }
 
-    private IEnumerable<Task> GetTasksByPriority()
+    private static List<Task> GetTasksByPriority(List<Task> tasks)
     {
         // Для старої схеми з цілими днями.
-        // return _tasks.OrderByDescending(w => w.Priority).ThenBy(w => w.Complexity);
-        return _tasks.OrderByDescending(t => t.Priority).ThenByDescending(t => t.Id);
+        // return tasks.OrderByDescending(t => t.Priority).ThenBy(t => t.Complexity);
+        return tasks.OrderByDescending(t => t.Priority).ThenByDescending(t => t.Id).ToList();
     }
 
-    private IEnumerable<Worker> GetWorkersByVelocity()
+    private static List<Worker> GetWorkersByVelocity(List<Worker> workers)
     {
-        return _workers.OrderByDescending(w => w.DevelopmentVelocity).ThenByDescending(w => w.Salary);
+        return workers.OrderByDescending(w => w.DevelopmentVelocity).ThenByDescending(w => w.Salary).ToList();
     }
 
     private static int CountUsedWorkers(List<Task> tasks)
@@ -233,27 +242,30 @@ public class ProjectPlanner
         return uniqueWorkers.Count;
     }
 
-    private static List<Task> CloneTasks(List<Task> tasks)
+    private static (List<Task> Tasks, List<Worker> Workers) CopyTasksAndWorkersFromProject(Project project)
     {
-        List<Task> newTasks = tasks
-            .Select(t =>
-            {
-                var newTask = new Task(t.Id, t.Name, t.Complexity)
-                {
-                    Priority = t.Priority
-                };
-                newTask.AvailableWorkers.AddRange(t.AvailableWorkers);
-                return newTask;
-            })
+        var tasks = project.Tasks
+            .Select(t => new Task(t.Id, t.Name, t.Complexity))
+            .ToList();
+        var workers = project.Workers
+            .Select(w => new Worker(w.Id, w.Name, w.Salary, w.DevelopmentVelocity))
             .ToList();
 
-        newTasks.ForEach(newTask =>
+        // Fill up dependencies between tasks and workers.
+        foreach (Task task in tasks)
         {
-            IEnumerable<int> childTaskIds = tasks.Find(t => t.Id == newTask.Id)!.ChildTasks.Select(t => t.Id);
-            newTask.ChildTasks.AddRange(childTaskIds.Select(id => newTasks.Find(t => t.Id == id)!));
-        });
+            Core.Task projectTask = project.Tasks.Find(t => t.Id == task.Id)!;
 
-        return newTasks;
+            IEnumerable<Worker> availableWorkers = projectTask.AvailableWorkers
+                .Select(aw => workers.Find(w => w.Id == aw.Id)!);
+            task.AvailableWorkers.AddRange(availableWorkers);
+
+            IEnumerable<Task> childTasks = projectTask.ChildTasks
+                .Select(ct => tasks.Find(t => t.Id == ct.Id)!);
+            task.ChildTasks.AddRange(childTasks);
+        }
+
+        return (tasks, workers);
     }
 
     private static Worker? FindWorkerToRemove(List<Task> tasks, List<Worker> sortedWorkers)
