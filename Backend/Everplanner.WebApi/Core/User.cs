@@ -1,4 +1,4 @@
-﻿namespace Everplanner.WebApi;
+﻿namespace Everplanner.WebApi.Core;
 
 public class User
 {
@@ -10,7 +10,7 @@ public class User
         Password = pasword;
         Projects = projects.ToList();
     }
-    
+
     public int Id { get; }
     public string Name { get; }
     public string Email { get; }

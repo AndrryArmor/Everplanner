@@ -1,4 +1,7 @@
-﻿namespace Everplanner.WebApi;
+﻿using Everplanner.WebApi.Core;
+using Task = Everplanner.WebApi.Core.Task;
+
+namespace Everplanner.WebApi;
 
 public static class InMemoryDatabase
 {

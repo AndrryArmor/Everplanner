@@ -1,14 +1,14 @@
 ﻿using Everplanner.WebApi.Dto;
 
-namespace Everplanner.WebApi;
+namespace Everplanner.WebApi.Planning;
 
-public class Project
+public class ProjectPlanner
 {
     private List<Task> _tasks;
     private List<Worker> _workers;
     private bool _isPlanned = false;
 
-    public Project(int id, string name, IEnumerable<Task> tasks, IEnumerable<Worker> workers)
+    public ProjectPlanner(int id, string name, IEnumerable<Task> tasks, IEnumerable<Worker> workers)
     {
         Id = id;
         Name = name;
@@ -23,7 +23,7 @@ public class Project
     public double EndingTime { get; private set; }
     public int UsedWorkersCount { get; private set; }
 
-    public static Project BuildProject(ProjectRequestModel projectRequestModel)
+    public static ProjectPlanner BuildProject(ProjectRequestModel projectRequestModel)
     {
         List<Task> tasks = projectRequestModel.Tasks
             .Select(t => new Task(t.Id, t.Name, t.Complexity))
@@ -34,7 +34,7 @@ public class Project
 
         if (workers.Count == 0)
         {
-            throw new InvalidOperationException("Немає працівників для планування проєкту.");
+            throw new InvalidOperationException($"Немає працівників для планування проєкту {projectRequestModel.Name}.");
         }
 
         // Fill up dependencies between tasks and workers.
@@ -43,11 +43,8 @@ public class Project
             Task task = tasks.Find(t => t.Id == taskDto.Id)!;
             foreach (int parentTaskId in taskDto.ParentTasks)
             {
-                Task? parentTask = tasks.Find(t => t.Id == parentTaskId);
-                if (parentTask is null)
-                {
-                    throw new InvalidOperationException($"Батьківська задача {parentTaskId} не існує.");
-                }
+                Task? parentTask = tasks.Find(t => t.Id == parentTaskId)
+                    ?? throw new InvalidOperationException($"Задача з id={parentTaskId} не існує в проєкті {projectRequestModel.Name}.");
 
                 // Planning works with child tasks is easier for the algorithm than vice versa.
                 parentTask.ChildTasks.Add(task);
@@ -55,21 +52,17 @@ public class Project
 
             foreach (int workerId in taskDto.AvailableWorkers)
             {
-                Worker? availableWorker = workers.Find(w => w.Id == workerId);
-                if (availableWorker is null)
-                {
-                    throw new InvalidOperationException($"Працівник {availableWorker} не існує.");
-                }
-
+                Worker? availableWorker = workers.Find(w => w.Id == workerId) 
+                    ?? throw new InvalidOperationException($"Співробітник з id={workerId} не існує в проєкті {projectRequestModel.Name}.");
                 task.AvailableWorkers.Add(availableWorker);
             }
         }
 
         CountPriorities(tasks);
-        return new Project(projectRequestModel.Id, projectRequestModel.Name, tasks, workers);
+        return new ProjectPlanner(projectRequestModel.Id, projectRequestModel.Name, tasks, workers);
     }
 
-    public static PlannedProjectResponseModel ExportPlannedProject(Project project)
+    public static PlannedProjectResponseModel ExportPlannedProject(ProjectPlanner project)
     {
         var tasksForExport = project.Tasks
             .Select(t => new TaskResponseModel(t.Id, t.Name, t.ExecutionStart, t.ExecutionDuration, t.Executor!.Id));
@@ -243,7 +236,7 @@ public class Project
     private static List<Task> CloneTasks(List<Task> tasks)
     {
         List<Task> newTasks = tasks
-            .Select(t => 
+            .Select(t =>
             {
                 var newTask = new Task(t.Id, t.Name, t.Complexity)
                 {
@@ -268,7 +261,7 @@ public class Project
         for (int i = sortedWorkers.Count - 1; i >= 0; i--)
         {
             Worker worker = sortedWorkers[i];
-            bool isAnyCriticalTask = false; 
+            bool isAnyCriticalTask = false;
             foreach (Task task in tasks)
             {
                 Worker? workerToRemove = task.AvailableWorkers.Find(w => w.Id == worker.Id);

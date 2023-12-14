@@ -1,4 +1,5 @@
-﻿using Everplanner.WebApi.Dto;
+﻿using Everplanner.WebApi.Core;
+using Everplanner.WebApi.Dto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Everplanner.WebApi.Controllers;
@@ -38,7 +39,7 @@ public class UserController : ControllerBase
             return BadRequest("Користувач з такою електронною поштою уже існує.");
         }
 
-        int newUserId = InMemoryDatabase.Users.Max(u => u.Id) + 1;
+        int newUserId = InMemoryDatabase.Users.Any() ? InMemoryDatabase.Users.Max(u => u.Id) + 1 : 0;
         var newUser = new User(newUserId, createUserRequestModel.Name, createUserRequestModel.Email,
             createUserRequestModel.Password, new List<Project>());
         InMemoryDatabase.Users.Add(newUser);

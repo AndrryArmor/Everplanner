@@ -1,4 +1,6 @@
-﻿namespace Everplanner.WebApi.Dto;
+﻿using Everplanner.WebApi.Core;
+
+namespace Everplanner.WebApi.Dto;
 
 public record UserResponseModel(int Id, string Name, IEnumerable<ProjectPreviewResponseModel> Projects)
 {

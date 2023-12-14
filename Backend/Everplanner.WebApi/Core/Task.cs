@@ -1,4 +1,4 @@
-﻿namespace Everplanner.WebApi;
+﻿namespace Everplanner.WebApi.Core;
 
 public class Task
 {
@@ -14,9 +14,4 @@ public class Task
     public int Complexity { get; }
     public List<Task> ChildTasks { get; } = new();
     public List<Worker> AvailableWorkers { get; } = new();
-    public int Priority { get; set; }
-    public double Availability { get; set; }
-    public Worker? Executor { get; set; }
-    public double ExecutionStart { get; set; }
-    public double ExecutionDuration { get; set; }
 }

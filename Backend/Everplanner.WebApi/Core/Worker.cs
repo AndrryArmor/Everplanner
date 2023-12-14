@@ -1,4 +1,4 @@
-﻿namespace Everplanner.WebApi;
+﻿namespace Everplanner.WebApi.Core;
 
 public class Worker
 {
@@ -14,5 +14,4 @@ public class Worker
     public string Name { get; }
     public int Salary { get; }
     public int DevelopmentVelocity { get; }
-    public double Availability { get; set; }
 }

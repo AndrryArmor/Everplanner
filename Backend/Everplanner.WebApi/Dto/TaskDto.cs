@@ -1,4 +1,5 @@
-﻿
+﻿using Task = Everplanner.WebApi.Core.Task;
+
 namespace Everplanner.WebApi.Dto;
 
 public record TaskDto(int Id, string Name, int Complexity, IEnumerable<int> ParentTasks, IEnumerable<int> AvailableWorkers)

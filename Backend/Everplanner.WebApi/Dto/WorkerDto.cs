@@ -1,4 +1,5 @@
-﻿
+﻿using Everplanner.WebApi.Core;
+
 namespace Everplanner.WebApi.Dto;
 
 public record WorkerDto(int Id, string Name, int Salary, int DevelopmentVelocity)
