@@ -47,10 +47,6 @@ import { ref, watchEffect } from "vue";
 
 const props = defineProps({
   rowIndex: Number,
-  newWorkerId: {
-    type: Number,
-    required: true,
-  },
   dollarSign: {
     type: String,
     required: true,
@@ -65,13 +61,12 @@ const emit = defineEmits(["add-new-worker"]);
 var newWorker = resetNewWorker();
 function resetNewWorker() {
   return ref({
-    id: props.newWorkerId,
+    id: 0,
     name: "",
     salary: null,
     developmentVelocity: null,
   });
 }
-watchEffect(() => (newWorker.value.id = props.newWorkerId));
 
 function addNewWorker() {
   emit("add-new-worker", newWorker.value);

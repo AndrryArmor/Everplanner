@@ -60,13 +60,16 @@ function openProject(projectId) {
 
 async function addNewProject(project) {
   try {
-    const projectId = await fetch(`https://localhost:7229/api/users/${route.params.userId}/projects`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(project),
-    }).then(async (response) => {
+    const projectId = await fetch(
+      `https://localhost:7229/api/users/${route.params.userId}/projects`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(project),
+      }
+    ).then(async (response) => {
       const res = await response.text();
       if (!response.ok) {
         throw new Error(res);
@@ -87,7 +90,7 @@ async function deleteProject(projectId) {
       method: "DELETE",
     }).then(async (response) => {
       if (!response.ok) {
-        throw new Error(response.text());
+        throw new Error(await response.text());
       }
     });
 

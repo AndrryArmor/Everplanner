@@ -105,10 +105,6 @@ import { ref, computed, watchEffect } from "vue";
 
 const props = defineProps({
   rowIndex: Number,
-  newTaskId: {
-    type: Number,
-    required: true,
-  },
   tasks: {
     type: Array,
     required: true,
@@ -130,14 +126,13 @@ const dropdownAddAvailableWorker = ref(null);
 var newTask = resetNewTask();
 function resetNewTask() {
   return ref({
-    id: props.newTaskId,
+    id: 0,
     name: "",
     complexity: null,
     parentTasks: [],
     availableWorkers: [],
   });
 }
-watchEffect(() => (newTask.value.id = props.newTaskId));
 
 const availableParentTasksToAdd = computed(() => {
   return props.tasks.filter((task) => !newTask.value.parentTasks.includes(task.id));
