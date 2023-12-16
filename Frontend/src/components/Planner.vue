@@ -255,26 +255,26 @@ async function deleteTask(taskId) {
 
 async function addParentTask(taskId, parentTaskId) {
   var foundTask = project.value.tasks.find((task) => task.id == taskId);
-  updateTask(foundTask);
   foundTask.parentTasks = [...foundTask.parentTasks, parentTaskId];
+  updateTask(foundTask);
 }
 
 async function deleteParentTask(taskId, parentTaskId) {
   var foundTask = project.value.tasks.find((task) => task.id == taskId);
-  updateTask(foundTask);
   foundTask.parentTasks = foundTask.parentTasks.filter((task) => task != parentTaskId);
+  updateTask(foundTask);
 }
 
 async function addAvailableWorker(taskId, workerId) {
   var foundTask = project.value.tasks.find((task) => task.id == taskId);
-  updateTask(foundTask);
   foundTask.availableWorkers = [...foundTask.availableWorkers, workerId];
+  updateTask(foundTask);
 }
 
 async function deleteAvailableWorker(taskId, workerId) {
   var foundTask = project.value.tasks.find((task) => task.id == taskId);
-  updateTask(foundTask);
   foundTask.availableWorkers = foundTask.availableWorkers.filter((task) => task != workerId);
+  updateTask(foundTask);
 }
 
 function planProject(mode) {
