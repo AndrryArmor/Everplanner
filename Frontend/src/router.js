@@ -6,6 +6,7 @@ import ProjectView from "./components/ProjectView.vue";
 import GanttChartView from "./components/GanttChartView.vue";
 
 const routes = [
+  { path: "/", redirect: "/login" },
   { path: "/signup", component: SignupView },
   { path: "/login", component: LoginView },
   { path: "/users/:userId/projects", component: ProjectsView },
