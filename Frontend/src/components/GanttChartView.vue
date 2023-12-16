@@ -47,7 +47,6 @@ import { BarChart } from "vue-chart-3";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import autocolors from "chartjs-plugin-autocolors";
 import { Chart, registerables } from "chart.js";
-import { defaults } from "chart.js";
 Chart.register(...registerables, ChartDataLabels, autocolors);
 
 const isLoading = ref(true);

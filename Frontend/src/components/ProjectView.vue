@@ -19,7 +19,7 @@
               </tr>
             </thead>
             <tbody>
-              <PlannerWorker
+              <ProjectWorker
                 v-for="(worker, index) in project.workers"
                 :key="worker.id"
                 :row-index="index + 1"
@@ -28,7 +28,7 @@
                 :development-velocity-metric="developmentVelocityMetric"
                 @delete-worker="deleteWorker"
               />
-              <PlannerNewWorker
+              <ProjectWorkerAddForm
                 :row-index="project.workers.length + 1"
                 :dollar-sign="dollarSign"
                 :development-velocity-metric="developmentVelocityMetric"
@@ -52,7 +52,7 @@
               </tr>
             </thead>
             <tbody>
-              <PlannerTask
+              <ProjectTask
                 v-for="(task, index) in project.tasks"
                 :key="task.id"
                 :row-index="index + 1"
@@ -66,7 +66,7 @@
                 @add-available-worker="addAvailableWorker"
                 @delete-available-worker="deleteAvailableWorker"
               />
-              <PlannerNewTask
+              <ProjectTaskAddForm
                 :row-index="project.tasks.length + 1"
                 :tasks="project.tasks"
                 :workers="project.workers"
@@ -104,13 +104,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import router from "../router";
-import PlannerWorker from "./PlannerWorker.vue";
-import PlannerNewWorker from "./PlannerNewWorker.vue";
-import PlannerTask from "./PlannerTask.vue";
-import PlannerNewTask from "./PlannerNewTask.vue";
+import ProjectWorker from "./ProjectWorker.vue";
+import ProjectWorkerAddForm from "./ProjectWorkerAddForm.vue";
+import ProjectTask from "./ProjectTask.vue";
+import ProjectTaskAddForm from "./ProjectTaskAddForm.vue";
 
 const emit = defineEmits([
   "back-to-projects",

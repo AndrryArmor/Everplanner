@@ -17,7 +17,7 @@
             </tr>
           </thead>
           <tbody>
-            <Project
+            <ProjectPreview
               v-for="(project, index) in user.projects"
               :key="project.id"
               :row-index="index + 1"
@@ -25,7 +25,7 @@
               @open-project="openProject"
               @delete-project="deleteProject"
             />
-            <NewProject
+            <ProjectAddForm
               :row-index="user.projects.length + 1"
               @add-new-project="addNewProject"
               @remove-hover="removeHover"
@@ -40,8 +40,8 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import Project from "./Project.vue";
-import NewProject from "./NewProject.vue";
+import ProjectPreview from "./ProjectPreview.vue";
+import ProjectAddForm from "./ProjectAddForm.vue";
 import { useRoute } from "vue-router";
 import router from "../router";
 
