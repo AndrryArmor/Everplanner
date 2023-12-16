@@ -1,47 +1,44 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <TheNavbar />
+  <router-view></router-view>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-}
+<script setup>
+import TheNavbar from "./components/TheNavbar.vue";
+</script>
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+<style lang="scss">
+@import "@/assets/variables.scss";
+.table {
+  td {
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+    button.action {
+      border-width: 0px;
+      margin: -0.25em -0.25em -0.25em -0.25em;
+    }
   }
 
-  .logo {
-    margin: 0 2rem 0 0;
+  .btn-close {
+    font-size: 0.75em;
   }
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
+  .inline-item {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  .dropdown {
+    position: static;
+
+    .dropdown-menu {
+      height: auto;
+      max-height: 200px;
+      overflow-x: hidden;
+    }
   }
 }
 </style>
