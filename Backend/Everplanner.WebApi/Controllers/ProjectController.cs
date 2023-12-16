@@ -1,20 +1,32 @@
 using Everplanner.WebApi.Core;
+using Everplanner.WebApi.Data;
 using Everplanner.WebApi.Dto;
 using Everplanner.WebApi.Planning;
 using Microsoft.AspNetCore.Mvc;
-using Task = Everplanner.WebApi.Core.Task;
-using Worker = Everplanner.WebApi.Core.Worker;
+using Microsoft.EntityFrameworkCore;
 
 namespace Everplanner.WebApi.Controllers;
 [ApiController]
 [Route("api/users/{userId}/projects")]
 public class ProjectController : ControllerBase
 {
-    [HttpGet("{projectId}")]
-    public IActionResult Get(int userId, int projectId)
+    private readonly EverplannerDbContext _dbContext;
+
+    public ProjectController(EverplannerDbContext dbContext)
     {
-        User? foundUser = InMemoryDatabase.Users.Find(u => u.Id == userId);
-        Project? foundProject = foundUser?.Projects.Find(p => p.Id == projectId);
+        _dbContext = dbContext;
+    }
+
+    [HttpGet("{projectId}")]
+    public async Task<IActionResult> Get(int userId, int projectId)
+    {
+        Project? foundProject = await _dbContext.Projects
+            .Include(p => p.Tasks)
+                .ThenInclude(t => t.ParentTasks)
+            .Include(p => p.Tasks)
+                .ThenInclude(t => t.AvailableWorkers)
+            .Include(p => p.Workers)
+            .FirstOrDefaultAsync(p => p.UserId == userId && p.Id == projectId);
         if (foundProject is null)
         {
             return NotFound("Проєкт не знайдено.");
@@ -24,40 +36,51 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPost("")]
-    public IActionResult Post(int userId, ProjectDto project)
+    public async Task<IActionResult> Post(int userId, ProjectDto project)
     {
-        User? foundUser = InMemoryDatabase.Users.Find(u => u.Id == userId);
-        if (foundUser is null)
+        bool isUserFound = await _dbContext.Users.AnyAsync(u => u.Id == userId);
+        if (!isUserFound)
         {
             return NotFound("Користувача не знайдено.");
         }
 
-        IEnumerable<Project> allProjects = InMemoryDatabase.Users.SelectMany(u => u.Projects);
-        int newProjectId = allProjects.Any() ? allProjects.Max(u => u.Id) + 1 : 0;
-        var newProject = new Project(newProjectId, project.Name, new List<Task>(), new List<Worker>());
-        foundUser.Projects.Add(newProject);
-        return Ok(newProjectId);
+        var newProject = new Project(project.Name, userId);
+        _dbContext.Projects.Add(newProject);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(newProject.Id);
     }
 
     [HttpDelete("{projectId}")]
-    public IActionResult Delete(int userId, int projectId)
+    public async Task<IActionResult> Delete(int userId, int projectId)
     {
-        User? foundUser = InMemoryDatabase.Users.Find(u => u.Id == userId);
-        Project? foundProject = foundUser?.Projects.Find(p => p.Id == projectId);
+        Project? foundProject = await _dbContext.Projects
+            .Include(p => p.Tasks)
+                .ThenInclude(t => t.ChildTasks)
+            .Include(p => p.Tasks)
+                .ThenInclude(t => t.AvailableWorkers)
+            .Include(p => p.Workers)
+            .FirstOrDefaultAsync(p => p.UserId == userId && p.Id == projectId);
         if (foundProject is null)
         {
             return NotFound("Проєкт не знайдено.");
         }
 
-        foundUser!.Projects.Remove(foundProject);
+        _dbContext.Projects.Remove(foundProject);
+        await _dbContext.SaveChangesAsync();
         return Ok();
     }
 
     [HttpGet("{projectId}/plan")]
-    public IActionResult PlanProject(int userId, int projectId, [FromQuery] string mode, [FromQuery] int expectedProjectDuration = int.MaxValue)
+    public async Task<IActionResult> PlanProject(int userId, int projectId, [FromQuery] string mode, [FromQuery] int expectedProjectDuration = int.MaxValue)
     {
-        User? foundUser = InMemoryDatabase.Users.Find(u => u.Id == userId);
-        Project? foundProject = foundUser?.Projects.Find(p => p.Id == projectId);
+        Project? foundProject = await _dbContext.Projects
+            .Include(p => p.Tasks)
+                .ThenInclude(t => t.ChildTasks)
+            .Include(p => p.Tasks)
+                .ThenInclude(t => t.AvailableWorkers)
+            .Include(p => p.Workers)
+            .FirstOrDefaultAsync(p => p.UserId == userId && p.Id == projectId);
         if (foundProject is null)
         {
             return NotFound("Проєкт не знайдено.");
@@ -65,7 +88,6 @@ public class ProjectController : ControllerBase
 
         try
         {
-            //Project project = Project.BuildProject(projectRequestModel);
             var projectPlanner = new ProjectPlanner(foundProject, Enum.Parse<PlanningMode>(mode), expectedProjectDuration);
             PlannedProjectDto projectResult = projectPlanner.PlanProject();
             return Ok(projectResult);

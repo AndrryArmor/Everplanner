@@ -2,16 +2,20 @@
 
 public class Task
 {
-    public Task(int id, string name, int complexity)
+    public Task(string name, int complexity, int projectId)
     {
-        Id = id;
         Name = name;
         Complexity = complexity;
+        ProjectId = projectId;
     }
 
-    public int Id { get; }
-    public string Name { get; } = string.Empty;
-    public int Complexity { get; }
+    public int Id { get; set; }
+    public string Name { get; private set; } = string.Empty;
+    public int Complexity { get; private set; }
+
+    public int ProjectId { get; private set; }
+    public Project Project { get; private set; } = null!;
+    public List<Task> ParentTasks { get; } = new();
     public List<Task> ChildTasks { get; } = new();
     public List<Worker> AvailableWorkers { get; } = new();
 }

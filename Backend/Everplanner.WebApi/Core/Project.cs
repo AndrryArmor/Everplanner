@@ -2,16 +2,17 @@
 
 public class Project
 {
-    public Project(int id, string name, IEnumerable<Task> tasks, IEnumerable<Worker> workers)
+    public Project(string name, int userId)
     {
-        Id = id;
         Name = name;
-        Tasks = tasks.ToList();
-        Workers = workers.ToList();
+        UserId = userId;
     }
 
-    public int Id { get; }
-    public string Name { get; }
-    public List<Task> Tasks { get; }
-    public List<Worker> Workers { get; }
+    public int Id { get; set; }
+    public string Name { get; private set; } = string.Empty;
+
+    public int UserId { get; private set; }
+    public User User { get; private set; } = null!;
+    public List<Task> Tasks { get; } = new();
+    public List<Worker> Workers { get; } = new();
 }

@@ -1,16 +1,27 @@
 ﻿using Everplanner.WebApi.Core;
+using Everplanner.WebApi.Data;
 using Everplanner.WebApi.Dto;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Everplanner.WebApi.Controllers;
 [ApiController]
 [Route("api")]
 public class UserController : ControllerBase
 {
-    [HttpGet("users/{userId}")]
-    public IActionResult Get(int userId)
+    private readonly EverplannerDbContext _dbContext;
+
+    public UserController(EverplannerDbContext dbContext)
     {
-        User? foundUser = InMemoryDatabase.Users.Find(u => u.Id == userId);
+        _dbContext = dbContext;
+    }
+
+    [HttpGet("users/{userId}")]
+    public async Task<IActionResult> Get(int userId)
+    {
+        User? foundUser = await _dbContext.Users
+            .Include(u => u.Projects)
+            .FirstOrDefaultAsync(u => u.Id == userId);
         if (foundUser is null)
         {
             return NotFound("Користувача не знайдено.");
@@ -20,10 +31,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("login")]
-    public IActionResult Login(UserLoginRequestModel userLoginRequestModel)
+    public async Task<IActionResult> Login(UserLoginRequestModel userLoginRequestModel)
     {
-        User? foundUser = InMemoryDatabase.Users.Find(u => u.Email == userLoginRequestModel.Email);
-        if (foundUser == null || userLoginRequestModel.Password != foundUser.Password)
+        User? foundUser = await _dbContext.GetUserByEmailAsync(userLoginRequestModel.Email);
+        if (foundUser == null || foundUser.Password != userLoginRequestModel.Password)
         {
             return NotFound("Невірна пошта і/або пароль користувача.");
         }
@@ -32,17 +43,16 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("signup")]
-    public IActionResult Post(CreateUserRequestModel createUserRequestModel)
+    public async Task<IActionResult> Post(CreateUserRequestModel createUserRequestModel)
     {
-        if (InMemoryDatabase.Users.Any(u => u.Email == createUserRequestModel.Email))
+        if (await _dbContext.IsUserWithEmailAsync(createUserRequestModel.Email))
         {
             return BadRequest("Користувач з такою електронною поштою уже існує.");
         }
 
-        int newUserId = InMemoryDatabase.Users.Any() ? InMemoryDatabase.Users.Max(u => u.Id) + 1 : 0;
-        var newUser = new User(newUserId, createUserRequestModel.Name, createUserRequestModel.Email,
-            createUserRequestModel.Password, new List<Project>());
-        InMemoryDatabase.Users.Add(newUser);
-        return Ok();
+        var newUser = new User(createUserRequestModel.Name, createUserRequestModel.Email, createUserRequestModel.Password);
+        _dbContext.Users.Add(newUser);
+        await _dbContext.SaveChangesAsync();
+        return Ok(newUser.Id);
     }
 }

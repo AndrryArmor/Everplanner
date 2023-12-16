@@ -1,3 +1,5 @@
+using Everplanner.WebApi.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Everplanner.WebApi;
 
@@ -18,7 +20,10 @@ public class Program
                     .AllowAnyHeader();
             });
         });
-
+        builder.Services.AddDbContext<EverplannerDbContext>(options =>
+        {
+            options.UseSqlServer(builder.Configuration.GetConnectionString("Everplanner"));
+        });
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();

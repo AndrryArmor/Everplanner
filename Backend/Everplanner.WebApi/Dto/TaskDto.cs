@@ -11,4 +11,10 @@ public record TaskDto(int Id, string Name, int Complexity, IEnumerable<int> Pare
             .Select(t => t.Id);
         return new TaskDto(task.Id, task.Name, task.Complexity, parentTasks, task.AvailableWorkers.Select(w => w.Id));
     }
+
+    public static TaskDto FromTask(Task task)
+    {
+        return new TaskDto(task.Id, task.Name, task.Complexity, task.ParentTasks.Select(t => t.Id), 
+            task.AvailableWorkers.Select(w => w.Id));
+    }
 }

@@ -2,18 +2,17 @@
 
 public class User
 {
-    public User(int id, string name, string email, string pasword, IEnumerable<Project> projects)
+    public User(string name, string email, string password)
     {
-        Id = id;
         Name = name;
         Email = email;
-        Password = pasword;
-        Projects = projects.ToList();
+        Password = password;
     }
 
-    public int Id { get; }
-    public string Name { get; }
-    public string Email { get; }
-    public string Password { get; }
-    public List<Project> Projects { get; }
+    public int Id { get; set; }
+    public string Name { get; private set; } = string.Empty;
+    public string Email { get; private set; } = string.Empty;
+    public string Password { get; private set; } = string.Empty;
+
+    public List<Project> Projects { get; } = new();
 }

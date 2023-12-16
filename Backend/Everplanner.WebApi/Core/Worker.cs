@@ -2,16 +2,20 @@
 
 public class Worker
 {
-    public Worker(int id, string name, int salary, int developmentVelocity)
+    public Worker(string name, int salary, int developmentVelocity, int projectId)
     {
-        Id = id;
         Name = name;
         Salary = salary;
         DevelopmentVelocity = developmentVelocity;
+        ProjectId = projectId;
     }
 
-    public int Id { get; }
-    public string Name { get; }
-    public int Salary { get; }
-    public int DevelopmentVelocity { get; }
+    public int Id { get; set; }
+    public string Name { get; private set; } = string.Empty;
+    public int Salary { get; private set; }
+    public int DevelopmentVelocity { get; private set; }
+
+    public int ProjectId { get; private set; }
+    public Project Project { get; private set; } = null!;
+    public List<Task> SubmittedTasks { get; private set; } = new();
 }

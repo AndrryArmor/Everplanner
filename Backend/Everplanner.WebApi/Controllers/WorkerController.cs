@@ -1,6 +1,8 @@
 ﻿using Everplanner.WebApi.Core;
+using Everplanner.WebApi.Data;
 using Everplanner.WebApi.Dto;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Everplanner.WebApi.Controllers;
 
@@ -8,36 +10,41 @@ namespace Everplanner.WebApi.Controllers;
 [Route("api/users/{userId}/projects/{projectId}/workers")]
 public class WorkerController : ControllerBase
 {
-    [HttpPost("")]
-    public IActionResult Post(int userId, int projectId, WorkerDto worker)
+    private readonly EverplannerDbContext _dbContext;
+
+    public WorkerController(EverplannerDbContext dbContext)
     {
-        User? foundUser = InMemoryDatabase.Users.Find(u => u.Id == userId);
-        Project? foundProject = foundUser?.Projects.Find(p => p.Id == projectId);
-        if (foundProject is null)
+        _dbContext = dbContext;
+    }
+
+    [HttpPost("")]
+    public async Task<IActionResult> Post(int userId, int projectId, WorkerDto worker)
+    {
+         bool isProjectFound = await _dbContext.Projects
+            .AnyAsync(p => p.UserId == userId && p.Id == projectId);
+        if (!isProjectFound)
         {
             return NotFound("Проєкт не знайдено.");
         }
 
-        IEnumerable<Worker> allWorkers = InMemoryDatabase.Users.SelectMany(u => u.Projects.SelectMany(p => p.Workers));
-        int newWorkerId = allWorkers.Any() ? allWorkers.Max(w => w.Id) + 1 : 0;
-        foundProject.Workers.Add(new Worker(newWorkerId, worker.Name, worker.Salary, worker.DevelopmentVelocity));
-        return Ok(newWorkerId);
+        var newWorker = new Worker(worker.Name, worker.Salary, worker.DevelopmentVelocity, projectId);
+        _dbContext.Workers.Add(newWorker);
+        await _dbContext.SaveChangesAsync();
+        return Ok(newWorker.Id);
     }
 
     [HttpDelete("{workerId}")]
-    public IActionResult Delete(int userId, int projectId, int workerId)
+    public async Task<IActionResult> Delete(int userId, int projectId, int workerId)
     {
-        User? foundUser = InMemoryDatabase.Users.Find(u => u.Id == userId);
-        Project? foundProject = foundUser?.Projects.Find(p => p.Id == projectId);
-        Worker? foundWorker = foundProject?.Workers.Find(w => w.Id == workerId);
+        Worker? foundWorker = await _dbContext.Workers
+            .FirstOrDefaultAsync(w => w.Project.UserId == userId && w.ProjectId == projectId && w.Id == workerId);
         if (foundWorker is null)
         {
             return NotFound("Співробітника не знайдено.");
         }
 
-        foundProject!.Workers.Remove(foundWorker);
-        // Remove deleted worker from awailable workers of all tasks.
-        foundProject.Tasks.ForEach(t => t.AvailableWorkers.Remove(foundWorker));
+        _dbContext.Workers.Remove(foundWorker);
+        await _dbContext.SaveChangesAsync();
 
         return Ok();
     }

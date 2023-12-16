@@ -57,18 +57,9 @@ public class ProjectPlanner
 
         double endingTime = _tasks.Any() ? _tasks.Max(task => task.ExecutionStart + task.ExecutionDuration) : 0;
         int usedWorkersCount = CountUsedWorkers(_tasks);
-
-        IEnumerable<PlannedTaskDto> sortedTasksForExport = _project.Tasks.Join(tasksForExport, 
-            projectTask => projectTask.Id,
-            exportTask => exportTask.Id,
-            (projectTask, exportTask) => exportTask);
-
-        IEnumerable<PlannedWorkerDto> sortedWorkersForExport = _project.Workers.Join(workersForExport,
-            projectWorker => projectWorker.Id,
-            exportWorker => exportWorker.Id,
-            (projectWorker, exportWorker) => exportWorker);
-
-        _plannedProject = new PlannedProjectDto(_project.Id, _project.Name, sortedTasksForExport, sortedWorkersForExport,
+        tasksForExport.Sort((t1, t2) => t1.Id - t2.Id);
+        workersForExport.Sort((w1, w2) => w1.Id - w2.Id);
+        _plannedProject = new PlannedProjectDto(_project.Id, _project.Name, tasksForExport, workersForExport,
             endingTime, usedWorkersCount);
         return _plannedProject;
     }

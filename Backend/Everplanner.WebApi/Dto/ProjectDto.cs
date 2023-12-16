@@ -6,7 +6,7 @@ public record ProjectDto(int Id, string Name, IEnumerable<TaskDto> Tasks, IEnume
 {
     public static ProjectDto FromProject(Project project)
     {
-        return new ProjectDto(project.Id, project.Name, project.Tasks.Select(t => TaskDto.FromTask(t, project.Tasks)),
+        return new ProjectDto(project.Id, project.Name, project.Tasks.Select(TaskDto.FromTask),
             project.Workers.Select(WorkerDto.FromWorker));
     }
 }
