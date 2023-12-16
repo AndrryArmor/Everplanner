@@ -6,7 +6,7 @@
   ></div>
   <div v-else>
     <h1 class="ms-5 mt-3">Проєкт "{{ project.name }}"</h1>
-    <form class="container-fluid mt-3 workers">
+    <form class="container-fluid mt-3 workers" @submit.prevent="">
       <h4 class="ms-5">Співробітники</h4>
       <div class="row overflow-x-auto">
         <div class="col-auto">
@@ -39,7 +39,7 @@
         </div>
       </div>
     </form>
-    <form class="container-fluid mt-3 tasks">
+    <form class="container-fluid mt-3 tasks" @submit.prevent="">
       <h4 class="ms-5">Задачі</h4>
       <div class="row overflow-x-auto">
         <div class="col-auto">

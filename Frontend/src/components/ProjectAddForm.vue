@@ -1,7 +1,7 @@
 <template>
   <tr @mouseover="removeHover" @mouseout="restoreHover">
     <td>
-      <button type="button" class="btn btn-outline-success p-1 action" @click="addNewProject">
+      <button type="submit" class="btn btn-outline-success p-1 action" @click="addNewProject">
         <i class="bi bi-check-square"></i>
       </button>
     </td>

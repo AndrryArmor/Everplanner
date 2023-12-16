@@ -4,7 +4,7 @@
     class="spinner-border text-primary position-absolute top-50 start-50"
     style="width: 3rem; height: 3rem"
   ></div>
-  <form v-else class="container-fluid mt-3 projects">
+  <form v-else class="container-fluid mt-3 projects" @submit.prevent="">
     <h4 class="ms-5">Проєкти користувача {{ user.name }}</h4>
     <div class="row overflow-x-auto">
       <div class="col-auto">

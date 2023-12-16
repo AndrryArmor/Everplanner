@@ -35,7 +35,7 @@
             </button>
             <ul ref="dropdownAddParentTask" class="dropdown-menu">
               <li v-for="parentTask in availableParentTasksToAdd" :key="parentTask.id">
-                <a class="dropdown-item" href="#" @click="addParentTask(parentTask.id)">
+                <a class="dropdown-item" @click="addParentTask(parentTask.id)">
                   {{ parentTask.name }}
                 </a>
               </li>
@@ -70,7 +70,7 @@
             </button>
             <ul ref="dropdownAddAvailableWorker" class="col-auto dropdown-menu">
               <li v-for="worker in availableWorkersForTaskToAdd" :key="worker.id">
-                <a class="dropdown-item" href="#" @click="addAvailableWorker(worker.id)">
+                <a class="dropdown-item" @click="addAvailableWorker(worker.id)">
                   {{ worker.name }}
                 </a>
               </li>
