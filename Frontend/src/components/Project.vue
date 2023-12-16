@@ -7,8 +7,8 @@
     </td>
     <td>{{ rowIndex }}</td>
     <td>{{ project.name }}</td>
-    <td>{{ project.workersCount }}</td>
-    <td>{{ project.tasksCount }}</td>
+    <td>{{ project.workers }}</td>
+    <td>{{ project.tasks }}</td>
   </tr>
 </template>
 

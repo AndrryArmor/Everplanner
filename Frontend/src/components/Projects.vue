@@ -71,14 +71,21 @@ async function addNewProject(project) {
       }
     ).then(async (response) => {
       const res = await response.text();
-      if (!response.ok) {
+      if (response.status == 400) {
+        throw new Error("Заповніть ім'я проєкту.");
+      } else if (!response.ok) {
         throw new Error(res);
       }
       return parseInt(res);
     });
 
-    project.id = projectId;
-    user.value.projects = [...user.value.projects, project];
+    const previewProject = {
+      id: projectId,
+      name: project.name,
+      workers: project.workers.length,
+      tasks: project.tasks.length,
+    };
+    user.value.projects = [...user.value.projects, previewProject];
   } catch (error) {
     alert(error.message);
   }

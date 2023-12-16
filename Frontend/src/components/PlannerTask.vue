@@ -17,7 +17,7 @@
             ref="parentTasksItems"
             class="col-auto border-primary text-primary inline-item"
           >
-            {{ tasks.find((t) => t.id == parentTaskId).name }}
+            {{ tasks.find((t) => t.id === parentTaskId).name }}
             <button
               type="button"
               class="btn-close"
@@ -52,7 +52,7 @@
             :key="workerId"
             class="col-auto border-primary text-primary inline-item"
           >
-            {{ workers.find((w) => w.id == workerId).name }}
+            {{ workers.find((w) => w.id === workerId).name }}
             <button
               type="button"
               class="btn-close"

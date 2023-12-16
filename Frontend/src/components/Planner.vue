@@ -146,7 +146,9 @@ async function addNewWorker(worker) {
       }
     ).then(async (response) => {
       const res = await response.text();
-      if (!response.ok) {
+      if (response.status == 400) {
+        throw new Error("Заповніть усі поля.");
+      } else if (!response.ok) {
         throw new Error(res);
       }
       return parseInt(res);
@@ -200,7 +202,9 @@ async function addTask(task) {
       }
     ).then(async (response) => {
       const res = await response.text();
-      if (!response.ok) {
+      if (response.status == 400) {
+        throw new Error("Заповніть усі поля.");
+      } else if (!response.ok) {
         throw new Error(res);
       }
       return parseInt(res);

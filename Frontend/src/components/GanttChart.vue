@@ -25,7 +25,13 @@
       </div>
     </template>
     <template v-else>
-      <p>Проєкт неможливо виконати за {{ $route.query.expectedProjectDuration }} дні(в).</p>
+      <p>
+        Проєкт неможливо виконати{{
+          route.query.expectedProjectDuration
+            ? ` за ${route.query.expectedProjectDuration} днів`
+            : ""
+        }}.
+      </p>
     </template>
     <button type="button" class="btn btn-lg btn-primary m-2" @click="backToPlanning">
       Назад до планування проєкту
