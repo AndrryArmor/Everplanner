@@ -21,6 +21,9 @@ public class UserController : ControllerBase
     {
         User? foundUser = await _dbContext.Users
             .Include(u => u.Projects)
+                .ThenInclude(p => p.Tasks)
+            .Include(u => u.Projects)
+                .ThenInclude(p => p.Workers)
             .FirstOrDefaultAsync(u => u.Id == userId);
         if (foundUser is null)
         {
@@ -28,6 +31,19 @@ public class UserController : ControllerBase
         }
 
         return Ok(UserResponseModel.FromUser(foundUser));
+    }
+
+    [HttpGet("users/{userId}/name")]
+    public async Task<IActionResult> GetName(int userId)
+    {
+        User? foundUser = await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        if (foundUser is null)
+        {
+            return NotFound("Користувача не знайдено.");
+        }
+
+        return Ok(foundUser.Name);
     }
 
     [HttpPost("login")]

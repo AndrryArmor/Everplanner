@@ -1,7 +1,7 @@
 ﻿using Everplanner.WebApi.Core;
 
 namespace Everplanner.WebApi;
-public record ProjectPreviewResponseModel(int Id, string Name, int WorkersCount, int TasksCount)
+public record ProjectPreviewResponseModel(int Id, string Name, int Workers, int Tasks)
 {
     public static ProjectPreviewResponseModel FromProject(Project project)
     {
