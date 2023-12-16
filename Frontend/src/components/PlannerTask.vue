@@ -5,7 +5,7 @@
         <i class="bi bi-trash"></i>
       </button>
     </td>
-    <td>{{ task.id }}</td>
+    <td>{{ rowIndex }}</td>
     <td>{{ task.name }}</td>
     <td>{{ task.complexity }} {{ storyPointsSign }}</td>
     <td>
@@ -17,7 +17,7 @@
             ref="parentTasksItems"
             class="col-auto border-primary text-primary inline-item"
           >
-            {{ tasks.find((t) => t.id == parentTaskId).name }}
+            {{ tasks.find((t) => t.id === parentTaskId).name }}
             <button
               type="button"
               class="btn-close"
@@ -52,7 +52,7 @@
             :key="workerId"
             class="col-auto border-primary text-primary inline-item"
           >
-            {{ workers.find((w) => w.id == workerId).name }}
+            {{ workers.find((w) => w.id === workerId).name }}
             <button
               type="button"
               class="btn-close"
@@ -85,13 +85,31 @@
 <script setup>
 import { ref, computed } from "vue";
 
-const props = defineProps(["task", "tasks", "workers", "storyPointsSign"]);
+const props = defineProps({
+  rowIndex: Number,
+  task: {
+    type: Object,
+    required: true,
+  },
+  tasks: {
+    type: Array,
+    required: true,
+  },
+  workers: {
+    type: Array,
+    required: true,
+  },
+  storyPointsSign: {
+    type: String,
+    required: true,
+  },
+});
 const emit = defineEmits([
-  "deleteTask",
-  "addParentTask",
-  "deleteParentTask",
-  "addAvailableWorker",
-  "deleteAvailableWorker",
+  "delete-task",
+  "add-parent-task",
+  "delete-parent-task",
+  "add-available-worker",
+  "delete-available-worker",
 ]);
 
 const dropdownAddParentTask = ref(null);
@@ -115,25 +133,25 @@ const hasAnyAvailableWorkersForTaskToAdd = computed(() => {
 });
 
 function deleteTask() {
-  emit("deleteTask", props.task.id);
+  emit("delete-task", props.task.id);
 }
 
 function addParentTask(parentTaskId) {
-  emit("addParentTask", props.task.id, parentTaskId);
+  emit("add-parent-task", props.task.id, parentTaskId);
   dropdownAddParentTask.value.classList.remove("show");
 }
 
 function deleteParentTask(parentTaskId) {
-  emit("deleteParentTask", props.task.id, parentTaskId);
+  emit("delete-parent-task", props.task.id, parentTaskId);
 }
 
 function addAvailableWorker(workerId) {
-  emit("addAvailableWorker", props.task.id, workerId);
+  emit("add-available-worker", props.task.id, workerId);
   dropdownAddAvailableWorker.value.classList.remove("show");
 }
 
 function deleteAvailableWorker(workerId) {
-  emit("deleteAvailableWorker", props.task.id, workerId);
+  emit("delete-available-worker", props.task.id, workerId);
 }
 </script>
 

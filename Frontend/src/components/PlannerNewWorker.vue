@@ -5,7 +5,7 @@
         <i class="bi bi-check-square"></i>
       </button>
     </td>
-    <td>{{ newWorker.id }}</td>
+    <td>{{ rowIndex }}</td>
     <td>
       <input
         type="text"
@@ -45,22 +45,31 @@
 <script setup>
 import { ref, watchEffect } from "vue";
 
-const props = defineProps(["newWorkerId", "dollarSign", "developmentVelocityMetric"]);
-const emit = defineEmits(["addNewWorker"]);
+const props = defineProps({
+  rowIndex: Number,
+  dollarSign: {
+    type: String,
+    required: true,
+  },
+  developmentVelocityMetric: {
+    type: String,
+    required: true,
+  },
+});
+const emit = defineEmits(["add-new-worker"]);
 
 var newWorker = resetNewWorker();
 function resetNewWorker() {
   return ref({
-    id: props.newWorkerId,
+    id: 0,
     name: "",
     salary: null,
     developmentVelocity: null,
   });
 }
-watchEffect(() => (newWorker.value.id = props.newWorkerId));
 
 function addNewWorker() {
-  emit("addNewWorker", newWorker.value);
+  emit("add-new-worker", newWorker.value);
   newWorker = resetNewWorker();
 }
 </script>

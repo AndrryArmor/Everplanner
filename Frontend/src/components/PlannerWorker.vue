@@ -5,7 +5,7 @@
         <i class="bi bi-trash"></i>
       </button>
     </td>
-    <td>{{ worker.id }}</td>
+    <td>{{ rowIndex }}</td>
     <td>{{ worker.name }}</td>
     <td>{{ worker.salary }}{{ dollarSign }}</td>
     <td>{{ worker.developmentVelocity }} {{ developmentVelocityMetric }}</td>
@@ -13,11 +13,25 @@
 </template>
 
 <script setup>
-const props = defineProps(["worker", "dollarSign", "developmentVelocityMetric"]);
-const emit = defineEmits(["deleteWorker"]);
+const props = defineProps({
+  rowIndex: Number,
+  worker: {
+    type: Object,
+    required: true,
+  },
+  dollarSign: {
+    type: String,
+    required: true,
+  },
+  developmentVelocityMetric: {
+    type: String,
+    required: true,
+  },
+});
+const emit = defineEmits(["delete-worker"]);
 
 function deleteWorker() {
-  emit("deleteWorker", props.worker.id);
+  emit("delete-worker", props.worker.id);
 }
 </script>
 

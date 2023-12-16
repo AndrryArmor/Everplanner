@@ -5,7 +5,7 @@
         <i class="bi bi-check-square"></i>
       </button>
     </td>
-    <td>{{ newTask.id }}</td>
+    <td>{{ rowIndex }}</td>
     <td>
       <input
         type="text"
@@ -103,8 +103,22 @@
 <script setup>
 import { ref, computed, watchEffect } from "vue";
 
-const props = defineProps(["newTaskId", "tasks", "workers", "storyPointsSign"]);
-const emit = defineEmits(["addNewTask"]);
+const props = defineProps({
+  rowIndex: Number,
+  tasks: {
+    type: Array,
+    required: true,
+  },
+  workers: {
+    type: Array,
+    required: true,
+  },
+  storyPointsSign: {
+    type: String,
+    required: true,
+  },
+});
+const emit = defineEmits(["add-new-task"]);
 
 const dropdownAddParentTask = ref(null);
 const dropdownAddAvailableWorker = ref(null);
@@ -112,14 +126,13 @@ const dropdownAddAvailableWorker = ref(null);
 var newTask = resetNewTask();
 function resetNewTask() {
   return ref({
-    id: props.newTaskId,
+    id: 0,
     name: "",
     complexity: null,
     parentTasks: [],
     availableWorkers: [],
   });
 }
-watchEffect(() => (newTask.value.id = props.newTaskId));
 
 const availableParentTasksToAdd = computed(() => {
   return props.tasks.filter((task) => !newTask.value.parentTasks.includes(task.id));
@@ -138,7 +151,7 @@ const hasAnyAvailableWorkersForTaskToAdd = computed(() => {
 });
 
 function addNewTask() {
-  emit("addNewTask", newTask.value);
+  emit("add-new-task", newTask.value);
   newTask = resetNewTask();
 }
 
